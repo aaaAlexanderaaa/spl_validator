@@ -1,0 +1,11 @@
+name: Fixture - bad yaml
+id: 00000000-0000-0000-0000-000000000004
+version: 1
+date: '2026-01-01'
+author: fixture
+status: experimental
+type: TTP
+description: This file is intentionally malformed YAML and should be skipped.
+search: 'index=web | stats count'
+broken: [1, 2
+

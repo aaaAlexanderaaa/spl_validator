@@ -1,0 +1,290 @@
+{
+    "tests": [
+        {
+            "name": "v3_valid_real_world_eval_dots",
+            "description": "Real-world eval with dotted field refs, concat, and dotted string literals",
+            "spl": "index=test| eval dns.sld=lower(mvindex(parts_rev,1)).\".\".'dns.tld' , test=hostname.version.\"test\".'a.b' , test2=json_object(\"id.orig_h\", 'columns.id.orig_h',\"id.orig_p\", 'columns.id.orig_p')",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_where_requires_full_consumption",
+            "description": "where must consume the full eval expression (no trailing tokens)",
+            "spl": "| makeresults | where -cc,test1",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL011"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_eval_requires_commas_between_assignments",
+            "description": "eval assignment lists require commas between assignments",
+            "spl": "| makeresults | eval a=1 b=2",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL010"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_where_unclosed_parenthesis",
+            "description": "where expression with unclosed parentheses should error",
+            "spl": "| makeresults | where (a=1",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL011"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_where_supports_eqeq_and_like",
+            "description": "where supports == and LIKE operators",
+            "spl": "| makeresults | eval status=200, user=\"admin\" | where status == 200 AND user LIKE \"adm%\"",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_subsearch_parsed_and_validated",
+            "description": "Bracketed subsearch must start with a generating command",
+            "spl": "| makeresults | join type=inner host [ stats count ]",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL021"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_prefix_not_with_subsearch_is_parsed",
+            "description": "Prefix NOT before a bracketed subsearch should still parse and validate the subsearch",
+            "spl": "NOT [ stats count ] index=main",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL021"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_required_args_sort",
+            "description": "sort requires at least one field argument",
+            "spl": "| makeresults | sort",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL014"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_head_count_suppresses_default_limit_warning",
+            "description": "head N should not warn about default 10",
+            "spl": "index=main | head 100",
+            "expected": {
+                "valid": true,
+                "warning_codes_not": [
+                    "LIMHEA"
+                ]
+            }
+        },
+        {
+            "name": "v3_fields_command_narrows_available_fields",
+            "description": "fields <list> should narrow the available field set for later warnings",
+            "spl": "| makeresults | eval dns.sld=\"x\", a=2 | fields a | table nothing",
+            "expected": {
+                "valid": true,
+                "warning_codes": [
+                    "FLD001"
+                ],
+                "warning_text_contains": [
+                    "Available fields include: a"
+                ],
+                "warning_text_not_contains": [
+                    "dns.sld"
+                ]
+            }
+        },
+        {
+            "name": "v3_eval_dotted_keyword_segment",
+            "description": "Dotted field segments may be keyword tokens (foo.by)",
+            "spl": "| makeresults | eval x=foo.by",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_sort_rejects_comma_only_arg",
+            "description": "sort requires a field; punctuation must not satisfy required args",
+            "spl": "| makeresults | sort ,",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL014"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_fields_allows_commas_as_separators",
+            "description": "fields a, b should not treat ',' as a field",
+            "spl": "| makeresults | eval a=1, b=2 | fields a, b | table nothing",
+            "expected": {
+                "valid": true,
+                "warning_codes": [
+                    "FLD001"
+                ],
+                "warning_text_contains": [
+                    "Available fields include: a, b"
+                ],
+                "warning_text_not_contains": [
+                    "Available fields include: ,"
+                ]
+            }
+        },
+        {
+            "name": "v3_empty_subsearch_has_distinct_error_code",
+            "description": "Empty subsearch should use SPL022 (distinct from function arity SPL020)",
+            "spl": "| makeresults | join host [ ]",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL022"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_search_in_operator_valid",
+            "description": "search supports <field> IN (<value-list>)",
+            "spl": "index=main action IN (addtocart, purchase)",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_search_prefix_not_in_valid",
+            "description": "search uses prefix NOT: NOT <field> IN (...)",
+            "spl": "index=main NOT action IN (addtocart, purchase)",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_search_not_in_wrong_order_invalid",
+            "description": "search does not use SQL-style <field> NOT IN (...)",
+            "spl": "index=main action NOT IN (addtocart, purchase)",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL011"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_search_lowercase_in_warns",
+            "description": "search IN keyword casing is a best-practice warning",
+            "spl": "index=main action in (addtocart, purchase)",
+            "expected": {
+                "valid": true,
+                "warning_codes": [
+                    "BEST011"
+                ]
+            }
+        },
+        {
+            "name": "v3_where_in_operator_is_invalid",
+            "description": "where supports IN (...) operator",
+            "spl": "| makeresults | where action IN (addtocart, purchase)",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_time_modifiers_allow_at_snap",
+            "description": "earliest/latest relative time modifiers may include @ snap syntax",
+            "spl": "earliest=-20m@m latest=-5m@m index=main",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_time_modifiers_allow_minus_unit",
+            "description": "earliest supports -h style relative time modifiers",
+            "spl": "earliest=-h index=main",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_time_modifiers_allow_at_prefix",
+            "description": "earliest supports @w0 style snap-to time modifiers",
+            "spl": "earliest=@w0 index=main",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_search_in_value_allows_wildcards_and_dots",
+            "description": "IN value list accepts wildcard and dotted bare values",
+            "spl": "index=main name IN (*.kube,entitlements.production.platform,default)",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_search_in_value_allows_ipv4_cidr",
+            "description": "IN value list accepts IPv4 CIDR values like 172.16.0.0/12",
+            "spl": "index=nsm_logs id.resp_h IN (0.0.0.0/0, 172.16.0.0/12)",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "v3_search_in_trailing_comma_invalid",
+            "description": "IN value list must not have a trailing comma",
+            "spl": "index=main name IN (foo,bar,)",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL011"
+                ],
+                "error_count": 1
+            }
+        },
+        {
+            "name": "v3_markdown_fence_is_ignored_with_warning",
+            "description": "Markdown ```...``` is not SPL and is ignored for validation",
+            "spl": "index=main ```comment``` action=foo",
+            "expected": {
+                "valid": true,
+                "warning_codes": [
+                    "SPL052"
+                ]
+            }
+        },
+        {
+            "name": "v3_eval_macro_skips_validation_with_warning",
+            "description": "Macros inside eval are not expanded; validator warns and skips further eval validation",
+            "spl": "| makeresults | eval a=1, b=2 `my_macro()` | table a",
+            "expected": {
+                "valid": true,
+                "warning_codes": [
+                    "SPL053"
+                ]
+            }
+        }
+    ]
+}

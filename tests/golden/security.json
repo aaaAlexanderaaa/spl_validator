@@ -1,0 +1,58 @@
+{
+    "tests": [
+        {
+            "name": "brute_force_detection",
+            "description": "Detect brute force login attempts from KB security patterns",
+            "spl": "index=auth action=failed | bin _time span=5m | stats count as attempts BY _time, src_ip | where attempts > 10 | table _time, src_ip, attempts",
+            "expected": {
+                "valid": true,
+                "error_count": 0
+            }
+        },
+        {
+            "name": "login_session_correlation",
+            "description": "Correlate login sessions using transaction",
+            "spl": "index=auth | transaction user startswith=\"login\" endswith=\"logout\" maxspan=8h | stats avg(duration) as avg_session BY user",
+            "expected": {
+                "valid": true,
+                "error_count": 0,
+                "warning_codes": [
+                    "LIMTRA",
+                    "LIMSTA"
+                ]
+            }
+        },
+        {
+            "name": "network_connection_analysis",
+            "description": "Analyze network connections by source",
+            "spl": "index=firewall | stats count BY src_ip, dest_ip | sort -count | head 100",
+            "expected": {
+                "valid": true,
+                "error_count": 0,
+                "warning_codes": [
+                    "LIMSTA",
+                    "LIMSOR",
+                    "BEST005"
+                ]
+            }
+        },
+        {
+            "name": "timechart_bandwidth",
+            "description": "Bandwidth usage over time",
+            "spl": "index=network | timechart span=1h sum(bytes) as total_bytes BY host",
+            "expected": {
+                "valid": true,
+                "error_count": 0
+            }
+        },
+        {
+            "name": "failed_login_by_geo",
+            "description": "Failed logins enriched with geolocation",
+            "spl": "index=auth action=failed | lookup geo_lookup ip AS src_ip OUTPUT country, city | stats count BY country | sort -count",
+            "expected": {
+                "valid": true,
+                "error_count": 0
+            }
+        }
+    ]
+}

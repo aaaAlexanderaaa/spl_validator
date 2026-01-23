@@ -1,0 +1,10 @@
+name: Fixture - invalid search
+id: 00000000-0000-0000-0000-000000000002
+version: 1
+date: '2026-01-01'
+author: fixture
+status: experimental
+type: TTP
+description: Minimal fixture with an invalid SPL search.
+search: 'index=web | eval x="foo'
+

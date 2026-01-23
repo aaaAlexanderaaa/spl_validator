@@ -1,0 +1,81 @@
+{
+    "tests": [
+        {
+            "name": "non_generating_first",
+            "description": "Non-generating command cannot start pipeline",
+            "spl": "| stats count",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL001"
+                ]
+            }
+        },
+        {
+            "name": "where_first",
+            "description": "where requires preceding data",
+            "spl": "| where status > 400",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL001"
+                ]
+            }
+        },
+        {
+            "name": "rex_after_stats",
+            "description": "rex needs _raw which is gone after stats",
+            "spl": "index=web | stats count | rex \"(?<ip>\\d+\\.\\d+\\.\\d+\\.\\d+)\"",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL010"
+                ]
+            }
+        },
+        {
+            "name": "bin_after_chart",
+            "description": "bin needs _time which is gone after chart",
+            "spl": "index=web | chart count BY status | bin _time span=1h",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL011"
+                ]
+            }
+        },
+        {
+            "name": "unclosed_string",
+            "description": "Unclosed string literal",
+            "spl": "index=web | eval msg = \"hello",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL004"
+                ]
+            }
+        },
+        {
+            "name": "empty_pipeline",
+            "description": "Empty query",
+            "spl": "",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL005"
+                ]
+            }
+        },
+        {
+            "name": "pipe_only",
+            "description": "Just a pipe with no command",
+            "spl": "|",
+            "expected": {
+                "valid": false,
+                "error_codes": [
+                    "SPL005"
+                ]
+            }
+        }
+    ]
+}

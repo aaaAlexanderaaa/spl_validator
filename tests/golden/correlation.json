@@ -1,0 +1,52 @@
+{
+    "tests": [
+        {
+            "name": "stats_then_streamstats",
+            "description": "Using stats followed by streamstats on aggregated results",
+            "spl": "index=web | stats count BY host | streamstats sum(count) as running_total BY host",
+            "expected": {
+                "valid": true,
+                "error_count": 0
+            }
+        },
+        {
+            "name": "join_basic",
+            "description": "Basic join with subsearch",
+            "spl": "index=web | join user [search index=hr | table user, department]",
+            "expected": {
+                "valid": true,
+                "error_count": 0
+            }
+        },
+        {
+            "name": "transaction_with_patterns",
+            "description": "Transaction with startswith/endswith patterns",
+            "spl": "index=web | transaction session_id startswith=\"login\" endswith=\"logout\" maxspan=1h",
+            "expected": {
+                "valid": true,
+                "error_count": 0
+            }
+        },
+        {
+            "name": "eventstats_enrichment",
+            "description": "Using eventstats to enrich events with aggregations",
+            "spl": "index=web | eventstats avg(duration) as avg_duration BY host | where duration > avg_duration * 2",
+            "expected": {
+                "valid": true,
+                "error_count": 0
+            }
+        },
+        {
+            "name": "multiple_evals",
+            "description": "Chain of eval commands",
+            "spl": "index=web | eval size_kb = bytes / 1024 | eval size_mb = size_kb / 1024 | table host, size_mb",
+            "expected": {
+                "valid": true,
+                "error_count": 0,
+                "warning_codes": [
+                    "BEST008"
+                ]
+            }
+        }
+    ]
+}

@@ -6,9 +6,9 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from validator.src.lexer import Lexer
-from validator.src.parser.parser import ExpressionParser, CommandParser, ParseError
-from validator.src.parser.ast import FieldRef, BinaryOp
+from spl_validator.src.lexer import Lexer
+from spl_validator.src.parser.parser import ExpressionParser, CommandParser, ParseError
+from spl_validator.src.parser.ast import FieldRef, BinaryOp
 
 
 def test_expression_parser():

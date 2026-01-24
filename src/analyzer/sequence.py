@@ -74,7 +74,10 @@ COMMAND_DATA_FLOW: dict[str, tuple[DataState, DataState]] = {
     "timechart": (DataState.EVENTS, DataState.AGGREGATED),  # Needs _time; BY field must exist
     "top": (DataState.ANY, DataState.AGGREGATED),  # Field must exist
     "rare": (DataState.ANY, DataState.AGGREGATED),  # Field must exist
-    "transaction": (DataState.EVENTS, DataState.EVENTS),
+    # `transaction` can operate on event-like rows produced by transforming commands
+    # such as `tstats ... by ... _time`. Treat it as tolerant of input shape to avoid
+    # false positives in real-world searches.
+    "transaction": (DataState.ANY, DataState.ANY),
     "untable": (DataState.ANY, DataState.ANY),
     "xyseries": (DataState.ANY, DataState.ANY),
     

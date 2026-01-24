@@ -1226,11 +1226,21 @@ def validate_search_terms(cmd: Command, result: ValidationResult, *, warn_plain_
 
                 expect_value = True
                 seen_any_value = False
+                saw_empty_value = False
+                saw_trailing_comma = False
+                emitted_list_error = False
+                saw_implicit_string_separator = False
+                prev_value_end_offset: int | None = None
                 while k < len(tokens):
                     t = tokens[k]
                     if t.type == TokenType.RPAREN:
                         break
                     if expect_value:
+                        # Be permissive: allow empty items like IN (,a,b,) that Splunk often accepts.
+                        if t.type == TokenType.COMMA:
+                            saw_empty_value = True
+                            k += 1
+                            continue
                         consumed = _consume_in_value(tokens, k)
                         if consumed is None:
                             result.add_error(
@@ -1240,9 +1250,11 @@ def validate_search_terms(cmd: Command, result: ValidationResult, *, warn_plain_
                                 t.end,
                                 suggestion="Example: action IN (addtocart, purchase)",
                             )
+                            emitted_list_error = True
                             break
                         seen_any_value = True
                         expect_value = False
+                        prev_value_end_offset = tokens[consumed[0] - 1].end.offset
                         k = consumed[0]
                         continue
                     # Expect comma between values.
@@ -1250,6 +1262,17 @@ def validate_search_terms(cmd: Command, result: ValidationResult, *, warn_plain_
                         expect_value = True
                         k += 1
                         continue
+                    # Be tolerant of common real-world typo: missing comma between quoted values,
+                    # e.g. IN ("a" "b", "c"). Only accept when there is actual whitespace between
+                    # the two string tokens; do NOT accept adjacency like ("a""b").
+                    if prev_value_end_offset is not None and t.type == TokenType.STRING:
+                        # Offsets are absolute in the original SPL. If the next string token
+                        # starts at the same offset where the previous value ended, then it's
+                        # adjacency like ("a""b"), which we do NOT want to accept here.
+                        if t.start.offset > prev_value_end_offset:
+                            saw_implicit_string_separator = True
+                            expect_value = True
+                            continue
                     result.add_error(
                         "SPL011",
                         "Invalid IN value list: expected ',' or ')'",
@@ -1257,23 +1280,16 @@ def validate_search_terms(cmd: Command, result: ValidationResult, *, warn_plain_
                         t.end,
                         suggestion="Example: action IN (addtocart, purchase)",
                     )
+                    emitted_list_error = True
                     break
 
                 if k < len(tokens) and tokens[k].type == TokenType.RPAREN and expect_value and seen_any_value:
-                    # Trailing comma before ')'.
-                    result.add_error(
-                        "SPL011",
-                        "Trailing comma in IN value list",
-                        tokens[k].start,
-                        tokens[k].end,
-                        suggestion="Remove the trailing comma before ')'",
-                    )
-                    i = k + 1
-                    continue
+                    # Trailing comma (or empty item) before ')'. Splunk often accepts this; warn for style.
+                    saw_trailing_comma = True
 
                 if k >= len(tokens) or tokens[k].type != TokenType.RPAREN:
                     # If we already emitted an error above, don't spam.
-                    if not any(
+                    if not emitted_list_error and not any(
                         e.code == "SPL011" and e.start == tokens[j].start for e in result.errors
                     ):
                         end_tok = tokens[min(k, len(tokens) - 1)]
@@ -1291,6 +1307,24 @@ def validate_search_terms(cmd: Command, result: ValidationResult, *, warn_plain_
                         tokens[k].end,
                         suggestion="Example: action IN (addtocart, purchase)",
                     )
+                else:
+                    span_end = tokens[k].end
+                    if saw_implicit_string_separator:
+                        result.add_warning(
+                            "BEST015",
+                            "IN value lists should use commas between quoted values (tolerated when whitespace-separated, but error-prone)",
+                            tokens[j].start,
+                            span_end,
+                            suggestion="Example: action IN (\"a\", \"b\")",
+                        )
+                    if saw_empty_value or saw_trailing_comma:
+                        result.add_warning(
+                            "BEST014",
+                            "Avoid empty items/trailing commas in IN value lists (Splunk often accepts them, but they are error-prone)",
+                            tokens[j].start,
+                            span_end,
+                            suggestion="Example: action IN (addtocart, purchase)",
+                        )
 
                 i = k + 1
                 continue

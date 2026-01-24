@@ -190,7 +190,9 @@ FUNCTIONS: dict[str, FunctionDef] = {
     "latest_time": FunctionDef("latest_time", 1, 1, "stats"),
     "values": FunctionDef("values", 1, 1, "stats"),
     "list": FunctionDef("list", 1, 1, "stats"),
-    "sparkline": FunctionDef("sparkline", 1, 2, "stats"),
+    # Splunk accepts `stats sparkline` (no parentheses) as a shorthand sparkline of event count.
+    # It also accepts `sparkline(<stats-func>(<field>)[,<span>])`.
+    "sparkline": FunctionDef("sparkline", 0, 2, "stats"),
     "rate": FunctionDef("rate", 1, 1, "stats"),
     "rate_avg": FunctionDef("rate_avg", 1, 1, "stats"),
     "rate_sum": FunctionDef("rate_sum", 1, 1, "stats"),

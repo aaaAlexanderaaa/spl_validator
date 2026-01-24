@@ -57,6 +57,7 @@ _STYLE_CODES = {
     "BEST002",
     "BEST011",
     "BEST012",
+    "BEST015",
 }
 
 _DIAGNOSTIC_CODES = {
@@ -197,4 +198,3 @@ def group_warnings(
         diagnostic=diagnostic,
         other=other,
     )
-

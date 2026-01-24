@@ -16,7 +16,7 @@ from typing import Any, Iterator, Optional
 
 import yaml
 
-from validator.core import validate
+from ..core import validate
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]

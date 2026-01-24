@@ -6,7 +6,7 @@ if __name__ == "__main__" and __package__ is None:
     print("Error: Cannot run validator.py directly due to relative imports.", file=sys.stderr)
     print("", file=sys.stderr)
     print("Use this command instead (from the repository root):", file=sys.stderr)
-    print("  python3 -m validator --spl=\"your SPL query\"", file=sys.stderr)
+    print("  python3 -m spl_validator --spl=\"your SPL query\"", file=sys.stderr)
     sys.exit(1)
 
 import argparse
@@ -26,10 +26,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python3 -m validator --spl="index=web | stats count BY host"
-  python3 -m validator --spl="| stats count" --format=json
-  python3 -m validator --file=query.spl
-  python3 -m validator --strict --spl="index=web | `my_macro(arg)` | stats count"
+  python3 -m spl_validator --spl="index=web | stats count BY host"
+  python3 -m spl_validator --spl="| stats count" --format=json
+  python3 -m spl_validator --file=query.spl
+  python3 -m spl_validator --strict --spl="index=web | `my_macro(arg)` | stats count"
         """
     )
     

@@ -5,8 +5,8 @@ import os
 
 # Add parent directory to path
 # NOTE: This file is intended to be runnable as:
-#   python3 validator/tests/test_basic.py
-# So we need the repository root (the directory that contains `validator/`) on sys.path.
+#   python3 spl_validator/tests/test_basic.py
+# So we need the repository root (the directory that contains `spl_validator/`) on sys.path.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 print("=== SPL Validator Test Suite ===\n")
@@ -14,7 +14,7 @@ print("=== SPL Validator Test Suite ===\n")
 # Test 1: Lexer
 print("Test 1: Lexer")
 try:
-    from validator.src.lexer import Lexer, TokenType
+    from spl_validator.src.lexer import Lexer, TokenType
     lexer = Lexer('index=web | stats count BY host')
     tokens = lexer.tokenize()
     print(f"  ✅ Tokenized: {len(tokens)} tokens")
@@ -29,7 +29,7 @@ print()
 # Test 2: Valid SPL
 print("Test 2: Valid SPL (index=web | stats count BY host)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate('index=web | stats count BY host')
     print(f"  Valid: {result.is_valid}")
     print(f"  Errors: {len(result.errors)}")
@@ -46,7 +46,7 @@ print()
 # Test 3: Invalid SPL (non-generating first)
 print("Test 3: Invalid SPL (| stats count)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate('| stats count')
     print(f"  Valid: {result.is_valid}")
     print(f"  Errors: {len(result.errors)}")
@@ -62,7 +62,7 @@ print()
 # Test 4: Registry
 print("Test 4: Registry")
 try:
-    from validator.src.registry import COMMANDS, FUNCTIONS
+    from spl_validator.src.registry import COMMANDS, FUNCTIONS
     print(f"  ✅ Commands: {len(COMMANDS)}")
     print(f"  ✅ Functions: {len(FUNCTIONS)}")
     print(f"  Sample commands: {list(COMMANDS.keys())[:5]}")
@@ -76,7 +76,7 @@ print()
 # Test 5: Stats aggregation arity
 print("Test 5: Invalid stats aggregation arity (index=web | stats sum(bytes, foo))")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate('index=web | stats sum(bytes, foo)')
     print(f"  Valid: {result.is_valid}")
     if result.is_valid:
@@ -98,7 +98,7 @@ print()
 # Test 6: Function context errors (stats-only function used in eval)
 print("Test 6: Invalid eval function context (| makeresults | eval x = dc(foo))")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate('| makeresults | eval x = dc(foo)')
     print(f"  Valid: {result.is_valid}")
     codes = [e.code for e in result.errors]
@@ -117,7 +117,7 @@ print()
 # Test 7: Missing pipe between commands (newline is whitespace, not a command separator)
 print("Test 7: Missing pipe between bin and sort (index=test | bin _time span=1d\\n sort -cc,test1)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate("index=test | bin _time span=1d\n sort -cc,test1")
     print(f"  Valid: {result.is_valid}")
     codes = [e.code for e in result.errors]
@@ -136,7 +136,7 @@ print()
 # Test 8: Strict mode unknown commands (macros still allowed)
 print("Test 8: Strict mode unknown command error (| makeresults | foo bar)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate("| makeresults | foo bar", strict=True)
     print(f"  Valid: {result.is_valid}")
     codes = [e.code for e in result.errors]
@@ -155,7 +155,7 @@ print()
 # Test 9: Strict mode allows macros as opaque commands
 print("Test 9: Strict mode allows macros (| makeresults | `my_macro(arg)` | stats count)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate("| makeresults | `my_macro(arg)` | stats count", strict=True)
     print(f"  Valid: {result.is_valid}")
     codes = [e.code for e in result.errors]
@@ -174,7 +174,7 @@ print()
 # Test 10: Missing pipe after initial search (newline is whitespace)
 print("Test 10: Missing pipe after initial search (index=test\\n eval -cc,test1)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate("index=test\n eval -cc,test1")
     print(f"  Valid: {result.is_valid}")
     codes = [e.code for e in result.errors]
@@ -196,7 +196,7 @@ try:
     from contextlib import redirect_stdout, redirect_stderr
     from pathlib import Path
 
-    from validator.tools.validate_detections import run
+    from spl_validator.tools.validate_detections import run
 
     fixtures_dir = Path(__file__).resolve().parent / "fixtures" / "detections"
 
@@ -218,7 +218,7 @@ try:
     with redirect_stdout(buf_out2), redirect_stderr(io.StringIO()):
         code2 = run(
             detections_dir=fixtures_dir,
-            start_after=Path("validator/tests/fixtures/detections/invalid.yml"),
+            start_after=Path("spl_validator/tests/fixtures/detections/invalid.yml"),
             output_format="json",
             max_yaml_error_logs=0,
             skip_files=set(),
@@ -237,7 +237,7 @@ print()
 
 print("Test 12: Stats whitespace-separated aggregations (index=web | stats count values(user_id) AS user_id BY host)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate("index=web | stats count values(user_id) AS user_id BY host")
     print(f"  Valid: {result.is_valid}")
     if not result.is_valid:
@@ -254,7 +254,7 @@ print()
 
 print("Test 13: No SPL050 for mid-pipeline search (index=main | search foo IN (\"a\",\"b\") | stats count)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate('index=main | search foo IN ("a","b") | stats count')
     print(f"  Valid: {result.is_valid}")
     codes = [w.code for w in result.warnings]
@@ -272,7 +272,7 @@ print()
 
 print("Test 14: Schema-aware missing field becomes error when known")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate(
         "| makeresults | eval x = foo | stats count BY x",
         schema_fields={"_time", "_raw", "bar"},
@@ -294,7 +294,7 @@ print()
 
 print("Test 15: Schema-aware stats default count output (| stats count BY host | where count>0)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate(
         "index=web | stats count BY host | where count>0",
         schema_fields={"host"},
@@ -315,7 +315,7 @@ print()
 
 print("Test 16: Schema-aware top numeric limit is not a field (| top 5 host | where count>0)")
 try:
-    from validator.core import validate
+    from spl_validator.core import validate
     result = validate(
         "index=web | top 5 host | where count>0",
         schema_fields={"host"},

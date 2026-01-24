@@ -5,14 +5,10 @@ A lightweight validator for **Splunk Enterprise 10.0** SPL. It parses a query an
 2. **Warnings** (best practices + limits)
 3. **Suggestions** (quick-fix hints attached to findings)
 
-> This validator was built from the Splunk knowledge base and searchbnf.conf by AI. Please feel free to provide feedback or submit a PR.
-
 ## Quickstart
 
 ```bash
-git clone https://github.com/aaaAlexanderaaa/spl_validator
-
-python3 -m spl_alidator --spl="index=web | stats count BY host | sort -count"
+python3 -m spl_validator --spl="index=web | stats count BY host | sort -count"
 python3 -m spl_validator --strict --spl="| makeresults | `my_macro(arg)` | stats count"
 python3 -m spl_validator --file=query.spl --format=json
 ```

@@ -7,7 +7,7 @@ import sys
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from validator.core import validate
+from spl_validator.core import validate
 
 
 def run_golden_tests(test_file: str) -> tuple[int, int]:

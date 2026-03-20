@@ -4,8 +4,8 @@ import json
 import os
 import sys
 
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+_repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _repo_root)
 
 from spl_validator.core import validate
 

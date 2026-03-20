@@ -65,3 +65,13 @@ pytest tests/             # if using pytest discovery (optional)
 
 - Supported commands: `spl_validator/src/registry/commands.py`
 - Supported functions: `spl_validator/src/registry/functions.py`
+
+## External corpus (splunk/security_content)
+
+To batch-validate detection YAML from [splunk/security_content](https://github.com/splunk/security_content):
+
+```bash
+python3 tools/scan_external_detections.py --root /path/to/security_content/detections
+```
+
+Findings from a sample scan (invalid vs YAML line-wrapping, genuine quote bugs) are documented in [`docs/security_content_validation.md`](docs/security_content_validation.md). Optional pytest: set `SECURITY_CONTENT_ROOT` and run `tests/test_security_content_scan.py`.

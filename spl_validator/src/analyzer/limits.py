@@ -36,9 +36,9 @@ LIMITS: dict[str, LimitDef] = {
         message="tail returns 10 events if count not specified."
     ),
     "subsearch": LimitDef(
-        limit=10000,
+        limit=50000,
         config="[subsearch] maxout",
-        message="Subsearch returns max 10,000 results by default."
+        message="Subsearch returns max 50,000 results by default ([subsearch] maxout in limits.conf; older releases often used 10,000)."
     ),
     "join_subsearch": LimitDef(
         limit=50000,
@@ -59,11 +59,6 @@ LIMITS: dict[str, LimitDef] = {
         limit=500,  # MB
         config="[mvexpand] max_mem_usage_mb",
         message="mvexpand limited to 500MB memory."
-    ),
-    "append": LimitDef(
-        limit=50000,
-        config=None,
-        message="Append subsearch returns max 50,000 results by default (use maxout=<int> to change)."
     ),
 }
 

@@ -1502,7 +1502,8 @@ def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
         cmd_def = get_command(cmd.name)
         
         if cmd_def and cmd_def.limit_key:
-            if cmd.name.lower() in ("head", "tail"):
+            cname = cmd.name.lower()
+            if cname in ("head", "tail"):
                 # `head`/`tail` only have a "default 10" warning when a count is not specified.
                 has_count = False
                 if "limit" in cmd.options or "count" in cmd.options:
@@ -1518,6 +1519,24 @@ def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
                                 continue
                 if has_count:
                     continue
+
+            if cname == "sort" and (
+                "limit" in cmd.options
+                or any(
+                    hasattr(a, "value") and isinstance(a.value, str) and a.value.isdigit()
+                    for a in cmd.args
+                )
+            ):
+                continue
+
+            if cname == "transaction" and "maxevents" in cmd.options:
+                continue
+
+            if cname == "join" and "max" in cmd.options:
+                continue
+
+            if cname in ("append", "appendcols") and "maxout" in cmd.options:
+                continue
 
             limit = get_limit(cmd_def.limit_key)
             if limit:

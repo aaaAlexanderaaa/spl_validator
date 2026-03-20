@@ -85,6 +85,8 @@ COMMAND_DATA_FLOW: dict[str, tuple[DataState, DataState]] = {
     "join": (DataState.ANY, DataState.ANY),
     "append": (DataState.ANY, DataState.ANY),
     "appendcols": (DataState.ANY, DataState.ANY),
+    # Requires prior rows; each invocation runs a nested search per input row
+    "map": (DataState.ANY, DataState.ANY),
 }
 
 

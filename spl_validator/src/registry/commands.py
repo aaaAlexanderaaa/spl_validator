@@ -428,10 +428,12 @@ COMMANDS: dict[str, CommandDef] = {
         clauses=[],
         limit_key=None
     ),
+    # Syntax (Splunk Search Reference): fieldformat (<field>=<quoted-string>)...
+    # Display format is per field assignment, not separate "field" + "format" options.
     "fieldformat": CommandDef(
         name="fieldformat",
         type="streaming",
-        required_args=["field", "format"],
+        required_args=[],
         optional_args={},
         clauses=[],
         limit_key=None

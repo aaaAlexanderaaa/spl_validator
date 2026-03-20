@@ -3,11 +3,9 @@
 import sys
 import os
 
-# Add parent directory to path
-# NOTE: This file is intended to be runnable as:
-#   python3 spl_validator/tests/test_basic.py
-# So we need the repository root (the directory that contains `spl_validator/`) on sys.path.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# Repository root (parent of tests/) must be on sys.path for `import spl_validator`.
+_repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _repo_root)
 
 print("=== SPL Validator Test Suite ===\n")
 
@@ -218,7 +216,7 @@ try:
     with redirect_stdout(buf_out2), redirect_stderr(io.StringIO()):
         code2 = run(
             detections_dir=fixtures_dir,
-            start_after=Path("spl_validator/tests/fixtures/detections/invalid.yml"),
+            start_after=Path("tests/fixtures/detections/invalid.yml"),
             output_format="json",
             max_yaml_error_logs=0,
             skip_files=set(),

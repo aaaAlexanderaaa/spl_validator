@@ -5,6 +5,16 @@ A lightweight validator for **Splunk Enterprise 10.0** SPL. It parses a query an
 2. **Warnings** (best practices + limits)
 3. **Suggestions** (quick-fix hints attached to findings)
 
+## Installation
+
+From the repository root (editable install recommended):
+
+```bash
+pip install -e .
+```
+
+This installs the `spl_validator` package and the **PyYAML** dependency used by `spl_validator.tools.validate_detections`.
+
 ## Quickstart
 
 ```bash
@@ -39,8 +49,14 @@ python3 -m spl_validator --file=query.spl --format=json
 
 ## Development
 
+Run tests from the repository root (after `pip install -e .`, or with `PYTHONPATH` set to the repo root):
+
 ```bash
-python3 spl_validator/tests/test_basic.py
+pip install -e ".[dev]"   # optional: pytest
+python3 tests/test_basic.py
+python3 tests/test_golden.py
+python3 tests/test_parser.py
+pytest tests/             # if using pytest discovery (optional)
 ```
 
 ## Reference

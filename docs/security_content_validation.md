@@ -4,6 +4,8 @@ This repository includes a scanner that runs the SPL validator over YAML `search
 
 ## Run the scan
 
+Use the repo-root **`tools/scan_external_detections.py`** (defaults to **`strict=True`**) so unknown commands invalidate searches. The packaged **`spl_validator.tools.validate_detections`** module defaults to **`strict=False`** for backward compatibility; pass **`--strict`** there for the same behavior.
+
 Clone [splunk/security_content](https://github.com/splunk/security_content) and point the tool at its `detections` folder:
 
 ```bash

@@ -13,7 +13,7 @@ From the repository root (editable install recommended):
 pip install -e .
 ```
 
-This installs the `spl_validator` package and the **PyYAML** dependency used by `spl_validator.tools.validate_detections`.
+This installs the `spl_validator` package and the **PyYAML** dependency used by `spl_validator.tools.validate_detections` (optional **`--strict`** treats unknown commands as errors). For **security_content**-style audits, prefer `tools/scan_external_detections.py`, which defaults to strict mode.
 
 ## Quickstart
 

@@ -356,7 +356,7 @@ COMMANDS: dict[str, CommandDef] = {
         required_args=[],
         optional_args={"extendtimerange": bool, "maxtime": int, "maxout": int, "timeout": int},
         clauses=[],
-        limit_key="subsearch"
+        limit_key="append"
     ),
     "appendcols": CommandDef(
         name="appendcols",

@@ -1520,14 +1520,18 @@ def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
                 if has_count:
                     continue
 
-            if cname == "sort" and (
-                "limit" in cmd.options
-                or any(
-                    hasattr(a, "value") and isinstance(a.value, str) and a.value.isdigit()
-                    for a in cmd.args
-                )
-            ):
-                continue
+            if cname == "sort":
+                if "limit" in cmd.options:
+                    continue
+                # Optional leading count: `sort <N> - field` (only the first arg is the limit).
+                if cmd.args:
+                    a0 = cmd.args[0]
+                    if hasattr(a0, "value") and isinstance(a0.value, str):
+                        try:
+                            int(a0.value)
+                            continue
+                        except ValueError:
+                            pass
 
             if cname == "transaction" and "maxevents" in cmd.options:
                 continue

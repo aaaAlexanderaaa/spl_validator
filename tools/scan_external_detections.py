@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Scan YAML detection files (e.g. splunk/security_content) and validate embedded `search` SPL.
 
+By default uses ``validate(..., strict=True)`` so **unknown SPL commands** (SPL013) invalidate
+a search, matching registry coverage for real-world corpora. Use ``--loose`` for the legacy
+behavior where unknown commands are warnings only.
+
 Usage:
   SECURITY_CONTENT_ROOT=/path/to/security_content python3 tools/scan_external_detections.py
   python3 tools/scan_external_detections.py --root /path/to/security_content/detections
@@ -48,6 +52,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Output format (default: text).",
     )
     parser.add_argument(
+        "--loose",
+        action="store_true",
+        help="Unknown commands are warnings only (strict=False). Default: strict=True (unknown command = invalid).",
+    )
+    parser.add_argument(
         "--fail-on-invalid",
         action="store_true",
         help="Exit 1 if any search is invalid (default: exit 0 after reporting).",
@@ -65,8 +74,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: not a directory: {root}", file=sys.stderr)
         return 2
 
+    strict_mode = not args.loose
     stats: dict = {
         "root": str(root),
+        "strict": strict_mode,
         "yaml_files": 0,
         "with_search": 0,
         "valid": 0,
@@ -93,7 +104,7 @@ def main(argv: list[str] | None = None) -> int:
         if not isinstance(search, str) or not search.strip():
             continue
         stats["with_search"] += 1
-        result = validate(search.strip(), strict=False)
+        result = validate(search.strip(), strict=strict_mode)
         if result.is_valid:
             stats["valid"] += 1
             continue
@@ -117,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(out, indent=2))
     else:
         print(f"Root: {root}")
+        print(f"strict={strict_mode} (use --loose for unknown-command warnings only)")
         print(f"YAML files scanned: {stats['yaml_files']}")
         print(f"Searches validated: {stats['with_search']}")
         print(f"Valid: {stats['valid']}  Invalid: {stats['invalid']}")

@@ -356,10 +356,12 @@ def validate_function_arity(name: str, arg_count: int, context: Optional[str] = 
     """Validate function argument count.
 
     Returns error message if invalid, None if valid.
+    Unknown function names are not handled here; callers should emit SPL023 after
+    ``is_known_function`` / ``get_function`` checks.
     """
     any_context = get_function(name)
     if any_context is None:
-        return f"Unknown function '{name}'"
+        return None
 
     func = get_function(name, context=context)
     if func is None:

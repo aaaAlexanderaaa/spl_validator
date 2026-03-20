@@ -45,13 +45,15 @@ def test_security_content_scan_completes_with_sane_counts() -> None:
         if not isinstance(search, str) or not search.strip():
             continue
         with_search += 1
-        if validate(search.strip(), strict=False).is_valid:
+        # strict=True: unknown commands (e.g. mstats) count as invalid so registry gaps show up.
+        if validate(search.strip(), strict=True).is_valid:
             valid += 1
         else:
             invalid += 1
 
     assert with_search >= 1500, "expected a full security_content detections tree"
-    assert valid >= with_search * 0.95, (
+    # ~26 additional invalid vs loose-only scan: missing commands (mstats, apply, fit, ...).
+    assert valid >= with_search * 0.97, (
         f"unexpected regression: valid {valid}/{with_search} "
-        f"(see docs/security_content_validation.md)"
+        f"(see docs/security_content_validation.md; scan uses strict=True)"
     )

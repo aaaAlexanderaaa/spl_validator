@@ -74,4 +74,6 @@ To batch-validate detection YAML from [splunk/security_content](https://github.c
 python3 tools/scan_external_detections.py --root /path/to/security_content/detections
 ```
 
-Findings from a sample scan (invalid vs YAML line-wrapping, genuine quote bugs) are documented in [`docs/security_content_validation.md`](docs/security_content_validation.md). Optional pytest: set `SECURITY_CONTENT_ROOT` and run `tests/test_security_content_scan.py`.
+By default the scanner uses **`strict=True`**: unknown SPL **commands** (SPL013) and unknown **functions** (SPL023) make a search invalid, so registry coverage affects the score. Use **`--loose`** if you only want parse/syntax errors without treating unknown commands as fatal.
+
+Findings from a sample scan are documented in [`docs/security_content_validation.md`](docs/security_content_validation.md). Optional pytest: set `SECURITY_CONTENT_ROOT` and run `tests/test_security_content_scan.py` (also uses strict mode).

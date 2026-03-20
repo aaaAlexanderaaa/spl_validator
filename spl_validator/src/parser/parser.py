@@ -682,7 +682,11 @@ class CommandParser:
         unexpected = []
         function_errors: list[tuple[str, str, Position, Position]] = []
 
-        from ..registry.functions import validate_function_arity, validate_function_context
+        from ..registry.functions import (
+            is_known_function,
+            validate_function_arity,
+            validate_function_context,
+        )
 
         def _first_dotted_identifier(inner: list[Token]) -> Optional[str]:
             """Extract first dotted identifier sequence from tokens inside outer parens."""
@@ -789,12 +793,26 @@ class CommandParser:
                     arg_count = 0
 
                 # Validate aggregation function name and arity in stats context.
-                ctx_err = validate_function_context(func_token.value, "stats")
-                if ctx_err:
-                    function_errors.append(("SPL021", ctx_err, func_token.start, end_pos))
-                arity_err = validate_function_arity(func_token.value, arg_count, context="stats")
-                if arity_err:
-                    function_errors.append(("SPL020", arity_err, func_token.start, end_pos))
+                if not is_known_function(func_token.value):
+                    function_errors.append(
+                        (
+                            "SPL023",
+                            f"Unknown function '{func_token.value}'",
+                            func_token.start,
+                            end_pos,
+                        )
+                    )
+                else:
+                    ctx_err = validate_function_context(func_token.value, "stats")
+                    if ctx_err:
+                        function_errors.append(("SPL021", ctx_err, func_token.start, end_pos))
+                    arity_err = validate_function_arity(
+                        func_token.value, arg_count, context="stats"
+                    )
+                    if arity_err:
+                        function_errors.append(
+                            ("SPL020", arity_err, func_token.start, end_pos)
+                        )
                 
                 # Check for AS alias
                 if self.match(TokenType.AS):

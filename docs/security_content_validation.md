@@ -24,15 +24,26 @@ Optional pytest (skipped unless the variable is set):
 SECURITY_CONTENT_ROOT=/tmp/security_content/detections python3 -m pytest tests/test_security_content_scan.py -v
 ```
 
+## Strict mode (default)
+
+The scanner calls `validate(spl, strict=True)` by default:
+
+- **Unknown commands** → **SPL013** **errors** (not warnings), so missing entries in `commands.py` reduce the valid count.
+- **Unknown functions** → **SPL023** **errors** (eval/where and stats aggregations).
+
+Pass **`--loose`** to use `strict=False` (unknown commands are **SPL006** warnings only; `is_valid` may still be true). That mode is useful for comparing against older reports but **hides registry gaps**.
+
 ## Snapshot (clone dated **2026-03-20**)
 
-| Metric | Value |
-|--------|------:|
-| YAML files with `search` | 2006 |
-| Valid per validator | 1987 |
-| Invalid | 19 |
+| Metric | `strict=True` (default) | `--loose` (`strict=False`) |
+|--------|------------------------:|---------------------------:|
+| YAML files with `search` | 2006 | 2006 |
+| Valid | 1961 | 1987 |
+| Invalid | 45 | 19 |
 
-Dominant error codes on invalid rows: **SPL004** (unclosed string), **SPL011** / **SPL006** (parse recovery), **SPL007** (invalid character inside botched strings), plus occasional **SPL014** (regex argument not seen because parsing stopped earlier).
+The **26** extra invalid rows under strict mode are almost entirely **SPL013** for real Splunk commands not yet in this validator’s registry (e.g. `mstats`, `apply`, `fit`, `summary`, and DSDL / MLTK helpers). Those searches are not “broken”; expanding `commands.py` will clear them.
+
+Dominant error codes on **other** invalid rows: **SPL004** (unclosed string), **SPL011** / **SPL006** (parse recovery), **SPL007**, **SPL014**, plus **SPL020** / **SPL021** / **SPL023** where applicable.
 
 ## Are the “syntax” failures real Splunk bugs?
 
@@ -65,4 +76,4 @@ Includes, among others:
 
 ## Maintenance
 
-Upstream may fix YAML formatting over time; re-run the scanner after major pulls. The optional pytest only checks that a configured tree is scannable and reports the invalid fraction—it does **not** require zero invalid searches.
+Upstream may fix YAML formatting over time; re-run the scanner after major pulls. The optional pytest uses **`strict=True`** and expects at least **97%** valid (see `tests/test_security_content_scan.py`)—it does **not** require zero invalid searches.

@@ -149,6 +149,16 @@ def test_eval_only_rejected_at_stats_aggregation() -> None:
         assert validate_function_context(fn, "stats") is not None
 
 
+def test_unknown_function_spl023_eval_and_stats() -> None:
+    r_eval = validate("| makeresults | eval x=notarealfunction(1)")
+    assert not r_eval.is_valid
+    assert any(e.code == "SPL023" and "notarealfunction" in e.message for e in r_eval.errors)
+
+    r_stats = validate("| makeresults | stats notarealfunction(field)")
+    assert not r_stats.is_valid
+    assert any(e.code == "SPL023" for e in r_stats.errors)
+
+
 def test_end_to_end_spl_samples() -> None:
     valid_samples = [
         '| makeresults | eval x=mvindex(mvfield,0,1)',

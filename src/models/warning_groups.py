@@ -162,8 +162,6 @@ class WarningGroupSummary:
 def group_warnings(
     warnings: Iterable[ValidationIssue], *, enabled_groups: set[str]
 ) -> WarningGroupSummary:
-    filtered = filter_warnings(warnings, enabled_groups=enabled_groups)
-
     limits: list[ValidationIssue] = []
     optimization: list[ValidationIssue] = []
     style: list[ValidationIssue] = []
@@ -172,8 +170,11 @@ def group_warnings(
     diagnostic: list[ValidationIssue] = []
     other: list[ValidationIssue] = []
 
-    for w in filtered:
+    # Single pass: classify and filter by enabled groups (avoid two full scans).
+    for w in warnings:
         g = warning_group(w)
+        if g not in enabled_groups:
+            continue
         if g == GROUP_LIMITS:
             limits.append(w)
         elif g == GROUP_OPTIMIZATION:

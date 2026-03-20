@@ -53,12 +53,14 @@ def _head_limit(cmd: Command) -> int:
 
 def check_suggestions(pipeline: Pipeline, result: ValidationResult) -> None:
     """Add best-practice and optimization warnings based on common SPL patterns."""
-    stats_count = sum(1 for c in pipeline.commands if c.name.lower() == "stats")
+    cmds = pipeline.commands
+    lower_names = [c.name.lower() for c in cmds]
+    stats_count = sum(1 for n in lower_names if n == "stats")
 
-    for i, cmd in enumerate(pipeline.commands):
-        cmd_name = cmd.name.lower()
-        prev_cmd = pipeline.commands[i - 1].name.lower() if i > 0 else ""
-        next_cmd = pipeline.commands[i + 1].name.lower() if i + 1 < len(pipeline.commands) else ""
+    for i, cmd in enumerate(cmds):
+        cmd_name = lower_names[i]
+        prev_cmd = lower_names[i - 1] if i > 0 else ""
+        next_cmd = lower_names[i + 1] if i + 1 < len(lower_names) else ""
 
         # BEST001: dedup without sort (non-deterministic)
         if cmd_name == "dedup" and i > 0 and prev_cmd != "sort":
@@ -93,7 +95,7 @@ def check_suggestions(pipeline: Pipeline, result: ValidationResult) -> None:
                 )
 
         # BEST004: multiple stats can often be combined
-        if cmd_name == "stats" and stats_count > 1 and cmd == pipeline.commands[-1]:
+        if cmd_name == "stats" and stats_count > 1 and cmd == cmds[-1]:
             result.add_warning(
                 "BEST004",
                 "Multiple stats commands in one pipeline may be inefficient",
@@ -105,7 +107,7 @@ def check_suggestions(pipeline: Pipeline, result: ValidationResult) -> None:
         # BEST005: sort followed by head should use a limited sort
         if cmd_name == "sort" and next_cmd == "head":
             sort_n = _sort_limit(cmd)
-            head_n = _head_limit(pipeline.commands[i + 1])
+            head_n = _head_limit(cmds[i + 1])
             if sort_n is None:
                 result.add_warning(
                     "BEST005",
@@ -158,7 +160,7 @@ def check_suggestions(pipeline: Pipeline, result: ValidationResult) -> None:
 
         # BEST009: extraction/parsing before filtering tends to be costly
         if cmd_name in _EXTRACTION_COMMANDS:
-            later_filter = any(c.name.lower() in _FILTERING_COMMANDS for c in pipeline.commands[i + 1 :])
+            later_filter = any(n in _FILTERING_COMMANDS for n in lower_names[i + 1 :])
             if later_filter:
                 result.add_warning(
                     "BEST009",

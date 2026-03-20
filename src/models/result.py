@@ -41,50 +41,48 @@ class ValidationResult:
     is_valid: bool              # True if no errors (warnings OK)
     issues: list[ValidationIssue] = field(default_factory=list)
     ast: Optional[Any] = None   # Parsed AST (if successful)
-    
-    @property
-    def errors(self) -> list[ValidationIssue]:
-        return [i for i in self.issues if i.severity == Severity.ERROR]
-    
-    @property
-    def warnings(self) -> list[ValidationIssue]:
-        return [i for i in self.issues if i.severity == Severity.WARNING]
-    
-    @property
-    def infos(self) -> list[ValidationIssue]:
-        return [i for i in self.issues if i.severity == Severity.INFO]
-    
+    # Parallel lists for O(1) access (CLI/JSON iterate these repeatedly).
+    errors: list[ValidationIssue] = field(default_factory=list, init=False, repr=False)
+    warnings: list[ValidationIssue] = field(default_factory=list, init=False, repr=False)
+    infos: list[ValidationIssue] = field(default_factory=list, init=False, repr=False)
+
     def add_error(self, code: str, message: str, start: Position, end: Position,
                   suggestion: Optional[str] = None) -> None:
         """Add an error issue."""
-        self.issues.append(ValidationIssue(
+        issue = ValidationIssue(
             severity=Severity.ERROR,
             code=code,
             message=message,
             start=start,
             end=end,
             suggestion=suggestion
-        ))
+        )
+        self.issues.append(issue)
+        self.errors.append(issue)
         self.is_valid = False
-    
+
     def add_warning(self, code: str, message: str, start: Position, end: Position,
                     suggestion: Optional[str] = None) -> None:
         """Add a warning issue."""
-        self.issues.append(ValidationIssue(
+        issue = ValidationIssue(
             severity=Severity.WARNING,
             code=code,
             message=message,
             start=start,
             end=end,
             suggestion=suggestion
-        ))
-    
+        )
+        self.issues.append(issue)
+        self.warnings.append(issue)
+
     def add_info(self, code: str, message: str, start: Position, end: Position) -> None:
         """Add an info issue."""
-        self.issues.append(ValidationIssue(
+        issue = ValidationIssue(
             severity=Severity.INFO,
             code=code,
             message=message,
             start=start,
             end=end
-        ))
+        )
+        self.issues.append(issue)
+        self.infos.append(issue)

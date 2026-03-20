@@ -2,6 +2,11 @@
 from typing import Iterator
 from .tokens import Token, TokenType, Position, KEYWORDS
 
+# Splunk relative-time suffixes (module-level to avoid per-number allocations).
+_TIME_SUFFIXES = frozenset(
+    {"s", "sec", "m", "min", "h", "hr", "d", "day", "w", "week", "mon", "y", "year"}
+)
+
 
 class Lexer:
     """Tokenizes SPL input with precise position tracking.
@@ -21,12 +26,7 @@ class Lexer:
     
     def tokenize(self) -> list[Token]:
         """Tokenize the entire input and return list of tokens."""
-        tokens = []
-        for token in self._tokenize_iter():
-            tokens.append(token)
-            if token.type == TokenType.EOF:
-                break
-        return tokens
+        return list(self._tokenize_iter())
     
     def _tokenize_iter(self) -> Iterator[Token]:
         """Generator that yields tokens one at a time."""
@@ -244,9 +244,7 @@ class Lexer:
                 suffix.append(self._current())
                 self._advance()
             suffix_str = ''.join(suffix).lower()
-            # Valid time suffixes
-            time_suffixes = {'s', 'sec', 'm', 'min', 'h', 'hr', 'd', 'day', 'w', 'week', 'mon', 'y', 'year'}
-            if suffix_str in time_suffixes:
+            if suffix_str in _TIME_SUFFIXES:
                 value.extend(suffix)
             else:
                 # Not a time suffix, roll back

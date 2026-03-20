@@ -1572,7 +1572,12 @@ def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
 
 
 def validate_functions(pipeline: Pipeline, result: ValidationResult) -> None:
-    """Validate function usage in pipeline (arity, context)."""
+    """Validate function usage in pipeline (arity, context).
+
+    Walks parsed expression trees for ``eval`` and ``where``. Stats-style commands
+    validate top-level aggregations separately during parsing. ``fieldformat`` format
+    strings are not re-lexed for nested function calls; see ``FunctionDef.command_usage_summary``.
+    """
     from .src.parser.ast import FunctionCall
     
     for cmd in pipeline.commands:

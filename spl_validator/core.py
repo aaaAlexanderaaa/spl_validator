@@ -1068,10 +1068,23 @@ def validate_commands(pipeline: Pipeline, result: ValidationResult, *, strict: b
 
 def _validate_required_arguments(cmd: Command, cmd_def, result: ValidationResult) -> None:
     """Validate that a known command has its required arguments."""
-    if not getattr(cmd_def, "required_args", None):
+    cmd_name = cmd.name.lower()
+
+    # `fieldformat` uses per-field assignments parsed into `options`; `required_args` is empty.
+    if cmd_name == "fieldformat":
+        if cmd.options:
+            return
+        result.add_error(
+            "SPL014",
+            f"{cmd.name} is missing required arguments (at least one field=\"format\" assignment)",
+            cmd.start,
+            cmd.end,
+            suggestion='Example: | fieldformat total="%$,.2f"',
+        )
         return
 
-    cmd_name = cmd.name.lower()
+    if not getattr(cmd_def, "required_args", None):
+        return
 
     # These commands enforce required arguments during parsing (or have specialized handling).
     if cmd_name in ("eval", "where", "bin"):
@@ -1081,9 +1094,12 @@ def _validate_required_arguments(cmd: Command, cmd_def, result: ValidationResult
         # Supported forms:
         # - regex <field>=<regex>
         # - regex field=<field> <regex>
-        # - regex <regex>   (defaults to _raw)
+        # - regex <regex>   (defaults to _raw; pattern may be punctuation-only, e.g. ".")
         if _has_meaningful_positional_args(cmd):
             return
+        for arg in cmd.args:
+            if hasattr(arg, "value") and isinstance(arg.value, str) and arg.value.strip():
+                return
         if any(k != "field" for k in cmd.options.keys()):
             return
         required_str = ", ".join(cmd_def.required_args)

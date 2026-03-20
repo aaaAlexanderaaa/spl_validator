@@ -46,7 +46,10 @@ def validate_lookup(cmd: Command, result: ValidationResult) -> None:
             "lookup command - ensure lookup table name and fields are specified",
             cmd.start,
             cmd.end,
-            suggestion="Usage: lookup <lookup_name> <field> [OUTPUT <output_fields>]"
+            suggestion=(
+                "Syntax: lookup <lookup_dataset> ( <lookup_field> [AS <event_field>] )... "
+                "[ ( OUTPUT | OUTPUTNEW ) ( <lookup_destfield> [AS <event_destfield>] )... ]"
+            ),
         )
 
 

@@ -57,6 +57,7 @@ pip install -e ".[dev]"   # optional: pytest
 python3 tests/test_basic.py
 python3 tests/test_golden.py
 python3 tests/test_parser.py
+python3 -m pytest tests/test_functions_registry.py  # every SPL function: syntax, category, arity, command mapping
 pytest tests/             # if using pytest discovery (optional)
 ```
 

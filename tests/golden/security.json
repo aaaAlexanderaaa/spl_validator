@@ -53,6 +53,18 @@
                 "valid": true,
                 "error_count": 0
             }
+        },
+        {
+            "name": "map_search_opaque_multiline",
+            "description": "map search=\"...\" may embed full SPL (including pipes); inner query is masked for lexing",
+            "spl": "| tstats count FROM datamodel=Authentication BY user\n| map maxsearches=70 search=\"\n| tstats count FROM datamodel=Authentication BY user\n| eval x=\\\"$user$\\\"\n| sort count\"",
+            "expected": {
+                "valid": true,
+                "error_count": 0,
+                "warning_codes": [
+                    "SPL054"
+                ]
+            }
         }
     ]
 }

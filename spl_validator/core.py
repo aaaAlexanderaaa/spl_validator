@@ -13,6 +13,107 @@ from .src.analyzer.suggestions import check_suggestions
 COMMAND_KEYWORDS = {TokenType.WHERE}
 
 
+def _scan_double_quoted_string_end(text: str, start_inside: int) -> int | None:
+    """Return index one past closing quote, or None if unterminated. Respects \\ escapes."""
+    i = start_inside
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if ch == "\\" and i + 1 < n:
+            i += 2
+            continue
+        if ch == '"':
+            return i + 1
+        i += 1
+    return None
+
+
+def _map_search_open_quote_at(text: str, k: int) -> int | None:
+    """If text[k:] begins the map option search\\s*=\\s*\", return index of opening \"."""
+    n = len(text)
+    if k + 6 > n or text[k : k + 6].lower() != "search":
+        return None
+    if k > 0 and (text[k - 1].isalnum() or text[k - 1] == "_"):
+        return None
+    if k + 6 < n and (text[k + 6].isalnum() or text[k + 6] == "_"):
+        return None
+    m = k + 6
+    while m < n and text[m].isspace():
+        m += 1
+    if m >= n or text[m] != "=":
+        return None
+    m += 1
+    while m < n and text[m].isspace():
+        m += 1
+    if m >= n or text[m] != '"':
+        return None
+    return m
+
+
+def _iter_map_body_starts(text: str):
+    """Yield offset immediately after the word 'map' for each map command."""
+    n = len(text)
+    j = 0
+    while j < n and text[j].isspace():
+        j += 1
+    if j + 3 <= n and text[j : j + 3].lower() == "map":
+        if j + 3 >= n or not (text[j + 3].isalnum() or text[j + 3] == "_"):
+            yield j + 3
+    i = 0
+    while i < n:
+        if text[i] == "|":
+            j = i + 1
+            while j < n and text[j].isspace():
+                j += 1
+            if j + 3 <= n and text[j : j + 3].lower() == "map":
+                if j + 3 >= n or not (text[j + 3].isalnum() or text[j + 3] == "_"):
+                    yield j + 3
+        i += 1
+
+
+def _find_map_search_payload_spans(text: str) -> tuple[list[tuple[int, int]], bool]:
+    """Return [(start, end_exclusive), ...] of inner map search=\"...\" payloads to blank out.
+
+    If any map search string is unclosed, returns ([], True) and the caller should not mask.
+    """
+    spans: list[tuple[int, int]] = []
+    n = len(text)
+    for body_start in _iter_map_body_starts(text):
+        k = body_start
+        while k < n:
+            if text[k] == "|":
+                break
+            oq = _map_search_open_quote_at(text, k)
+            if oq is not None:
+                inside = oq + 1
+                end_ex = _scan_double_quoted_string_end(text, inside)
+                if end_ex is None:
+                    return [], True
+                # Half-open [inside, end_ex - 1) covers characters between quotes.
+                if inside < end_ex - 1:
+                    spans.append((inside, end_ex - 1))
+                k = end_ex
+                continue
+            k += 1
+    return spans, False
+
+
+def _mask_map_search_string_payloads(text: str) -> tuple[str, list[tuple[int, int]], bool]:
+    """Replace map search=\"...\" interiors with spaces.
+
+    Newlines inside the payload are also blanked so the lexer can treat the value as a
+    single-line string (Splunk allows multiline map search strings; our lexer does not).
+    """
+    spans, aborted = _find_map_search_payload_spans(text)
+    if aborted or not spans:
+        return text, spans, aborted
+    out = list(text)
+    for a, b in spans:
+        for p in range(a, b):
+            out[p] = " "
+    return "".join(out), spans, False
+
+
 def _is_command_keyword(token_type: TokenType) -> bool:
     """Check if token type is a keyword that can also be a command name."""
     return token_type in COMMAND_KEYWORDS
@@ -88,8 +189,21 @@ def validate(
             suggestion="Add the closing ``` or remove the fence markers.",
         )
         return result
+
+    spl_for_lexing, map_payload_spans, _map_aborted = _mask_map_search_string_payloads(spl_for_lexing)
+    if map_payload_spans:
+        p0 = map_payload_spans[0][0]
+        p1 = map_payload_spans[-1][1] - 1
+        result.add_warning(
+            "SPL054",
+            'Ignoring inner SPL in map search="..." strings (opaque for validation; Splunk still runs each mapped search)',
+            _pos_from_offset(spl, p0),
+            _pos_from_offset(spl, max(p0, p1)),
+            suggestion="Expand or remove map search strings if you need them validated as SPL.",
+        )
+
     setattr(result, "_lex_spl", spl_for_lexing)
-    
+
     # Phase 1: Lexical analysis
     lexer = Lexer(spl_for_lexing)
     tokens = lexer.tokenize()

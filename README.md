@@ -29,6 +29,7 @@ python3 -m spl_validator --file=query.spl --format=json
 - Semantic checks: common command ordering/contexts, expression/function usage
 - Limit warnings: common SPL defaults (modeled after `limits.conf`)
 - Macros: backtick macros are treated as opaque tokens (not expanded)
+- `map`: the `search="..."` argument is blanked before lexing (with **SPL054**); inner SPL is not validated, matching Splunk’s separate subsearch execution
 - Debugging: AST + a lightweight “flow” sketch for fields/actions
 
 ## Contract (Splunk Enterprise 10.0)

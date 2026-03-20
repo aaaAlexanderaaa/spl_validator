@@ -1,4 +1,10 @@
-"""Limit warnings aligned to Splunk Enterprise 10.0 limits.conf and SPL defaults."""
+"""Limit warnings aligned to Splunk Enterprise 10.0 SPL Search Reference and limits.conf.
+
+Numeric defaults are taken from the Splunk 10.0 SPL Search Reference where stated explicitly
+(e.g. append vs general subsearch). The Admin Manual limits.conf spec can differ in wording
+or defaults for the same key; always confirm `$SPLUNK_HOME/etc/system/default/limits.conf`
+on a live instance when precision matters.
+"""
 from dataclasses import dataclass
 from typing import Optional
 
@@ -38,7 +44,10 @@ LIMITS: dict[str, LimitDef] = {
     "subsearch": LimitDef(
         limit=10000,
         config="[subsearch] maxout",
-        message="Subsearch returns max 10,000 results by default."
+        message=(
+            "Subsearches return max 10,000 results by default (SPL Search Reference; "
+            "see limits.conf [subsearch] maxout on your instance)."
+        ),
     ),
     "join_subsearch": LimitDef(
         limit=50000,
@@ -60,10 +69,14 @@ LIMITS: dict[str, LimitDef] = {
         config="[mvexpand] max_mem_usage_mb",
         message="mvexpand limited to 500MB memory."
     ),
+    # append maxout default is higher than general [subsearch] maxout (SPL Search Reference: append command).
     "append": LimitDef(
         limit=50000,
-        config=None,
-        message="Append subsearch returns max 50,000 results by default (use maxout=<int> to change)."
+        config="[subsearch] maxout (append command default)",
+        message=(
+            "append subsearch returns max 50,000 rows by default (append-specific maxout; "
+            "other subsearches use the lower global default)."
+        ),
     ),
 }
 

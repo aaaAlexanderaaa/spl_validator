@@ -546,7 +546,7 @@ COMMANDS: dict[str, CommandDef] = {
     ),
     "map": CommandDef(
         name="map",
-        type="generating",
+        type="streaming",
         required_args=["search"],
         optional_args={"maxsearches": int},
         clauses=[],
@@ -613,7 +613,8 @@ COMMANDS: dict[str, CommandDef] = {
         name="transpose",
         type="transforming",
         required_args=[],
-        optional_args={"int": int, "column_name": str, "header_field": str, "include_empty": bool},
+        # Row count is an optional leading positional argument in SPL (no option name).
+        optional_args={"column_name": str, "header_field": str, "include_empty": bool},
         clauses=[],
         limit_key=None
     ),

@@ -1,0 +1,40 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 10px;
+  width: 420px;
+}
+label {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+}
+#baseUrl {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 4px;
+}
+#spl {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+#go {
+  padding: 6px 12px;
+}
+#out {
+  max-height: 240px;
+  overflow: auto;
+  background: #111;
+  color: #e6e6e6;
+  padding: 8px;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

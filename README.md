@@ -21,7 +21,24 @@ This installs the `spl_validator` package and the **PyYAML** dependency used by 
 python3 -m spl_validator --spl="index=web | stats count BY host | sort -count"
 python3 -m spl_validator --strict --spl="| makeresults | `my_macro(arg)` | stats count"
 python3 -m spl_validator --file=query.spl --format=json
+# Paste-friendly (no inline shell quoting for multiline):
+python3 -m spl_validator < query.spl
+cat query.spl | python3 -m spl_validator --format=json
+python3 -m spl_validator 'index=web | stats count BY host'
 ```
+
+Optional defaults file: `.spl-validator.yaml` or `SPL_VALIDATOR_CONFIG` (see `spl_validator/examples/defaults.example.yaml`). Optional **registry packs** (YAML) extend commands: `--registry-pack PATH` (repeatable).
+
+### `prod` branch integrations
+
+On branch **`prod`**, the same validator also ships:
+
+- **HTTP**: `python3 -m spl_validator.httpd` then `POST /validate` with JSON `{"spl":"..."}` (CORS enabled for local tooling).
+- **TUI**: `pip install -e ".[tui]"` then `python3 -m spl_validator.tui` or `spl-validator-tui`.
+- **Browser**: load `browser_extension/` as an unpacked extension; it talks to the local HTTP server.
+- **Contract**: JSON Schema for default API output in `docs/contract/cli-json-output.schema.json` (for ports / CI).
+
+Full roadmap: [`PLAN.md`](PLAN.md).
 
 ## Features
 
@@ -53,12 +70,12 @@ python3 -m spl_validator --file=query.spl --format=json
 Run tests from the repository root (after `pip install -e .`, or with `PYTHONPATH` set to the repo root):
 
 ```bash
-pip install -e ".[dev]"   # optional: pytest
+pip install -e ".[dev]"   # pytest + jsonschema (contract tests)
 python3 tests/test_basic.py
 python3 tests/test_golden.py
 python3 tests/test_parser.py
 python3 -m pytest tests/test_functions_registry.py  # every SPL function: syntax, category, arity, command mapping
-pytest tests/             # if using pytest discovery (optional)
+python3 -m pytest tests/  # includes registry pack, CLI I/O, JSON schema contract
 ```
 
 ## Reference

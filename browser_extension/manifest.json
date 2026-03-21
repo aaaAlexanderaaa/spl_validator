@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "SPL Validator (local server)",
+  "version": "0.1.0",
+  "description": "Send pasted SPL to spl-validator-httpd (python -m spl_validator.httpd).",
+  "action": {
+    "default_title": "SPL Validator",
+    "default_popup": "popup.html"
+  },
+  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*"]
+}

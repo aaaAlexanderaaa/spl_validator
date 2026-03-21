@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPL Validator</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <label for="baseUrl">Server base URL</label>
+    <input id="baseUrl" type="url" value="http://127.0.0.1:8765" spellcheck="false" />
+
+    <label for="spl">SPL</label>
+    <textarea id="spl" rows="10" spellcheck="false" placeholder="Paste SPL here…"></textarea>
+
+    <div class="row">
+      <label><input type="checkbox" id="strict" /> Strict mode</label>
+      <button type="button" id="go">Validate</button>
+    </div>
+
+    <pre id="out" aria-live="polite"></pre>
+    <script src="popup.js"></script>
+  </body>
+</html>

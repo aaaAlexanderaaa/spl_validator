@@ -15,7 +15,16 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
+    "jsonschema>=4.0",
 ]
+tui = [
+    "textual>=0.47.0",
+]
+
+[project.scripts]
+spl-validator = "spl_validator.validator:main"
+spl-validator-serve = "spl_validator.httpd:main"
+spl-validator-tui = "spl_validator.tui:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

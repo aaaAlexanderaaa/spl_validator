@@ -15,7 +15,7 @@ import json
 from typing import Optional
 
 from .core import validate
-from .src.models import Severity
+from .json_payload import build_validation_json_dict
 from .src.models.warning_groups import group_warnings, parse_warning_groups
 
 
@@ -27,21 +27,45 @@ def main():
         epilog="""
 Examples:
   python3 -m spl_validator --spl="index=web | stats count BY host"
-  python3 -m spl_validator --spl="| stats count" --format=json
+  python3 -m spl_validator "index=web | stats count BY host"
+  echo 'index=web | stats count' | python3 -m spl_validator --stdin --format=json
   python3 -m spl_validator --file=query.spl
+  python3 -m spl_validator --file=- < query.spl
+  python3 -m spl_validator --preset=security_content --spl="index=web | stats count"
   python3 -m spl_validator --strict --spl="index=web | `my_macro(arg)` | stats count"
         """
     )
-    
+
+    parser.add_argument(
+        "spl_positional",
+        nargs="?",
+        metavar="SPL",
+        help="SPL query (alternative to --spl or --file)",
+    )
     parser.add_argument(
         "--spl",
         type=str,
-        help="SPL query string to validate"
+        help="SPL query string to validate",
     )
     parser.add_argument(
         "--file",
         type=str,
-        help="Path to file containing SPL query"
+        help="Path to file containing SPL query (use '-' for stdin)",
+    )
+    parser.add_argument(
+        "--stdin",
+        action="store_true",
+        help="Read SPL from standard input (same as --file=-)",
+    )
+    parser.add_argument(
+        "--preset",
+        choices=("default", "strict", "security_content"),
+        default=None,
+        help=(
+            "Configuration preset: default (loose commands, optimization advice), "
+            "strict (unknown commands are errors), "
+            "security_content (strict + all advice groups; aligns with ESCU-style scanning)"
+        ),
     )
     parser.add_argument(
         "--format",
@@ -106,26 +130,49 @@ Examples:
     
     args = parser.parse_args()
 
+    if args.preset == "strict":
+        args.strict = True
+    elif args.preset == "security_content":
+        args.strict = True
+        args.advice = "all"
+
     # Validate --advice early so typos produce an argparse-style error message.
     try:
         parse_warning_groups(args.advice)
     except ValueError as e:
         parser.error(str(e))
-    
-    # Get SPL from args or file
+
+    stdin_requested = bool(args.stdin) or (args.file == "-")
+    file_path_requested = bool(args.file) and args.file != "-"
+    sources = (
+        (1 if args.spl_positional is not None else 0)
+        + (1 if args.spl else 0)
+        + (1 if file_path_requested else 0)
+        + (1 if stdin_requested else 0)
+    )
+    if sources > 1:
+        parser.error("Use only one of: SPL positional argument, --spl, --file, or --stdin")
+
+    # Get SPL from args, file, or stdin
     spl: Optional[str] = None
-    if args.spl:
+    if args.spl_positional is not None:
+        spl = args.spl_positional
+    elif args.spl:
         spl = args.spl
+    elif args.stdin or (args.file and args.file == "-"):
+        spl = sys.stdin.read()
     elif args.file:
         try:
-            with open(args.file, "r") as f:
+            with open(args.file, "r", encoding="utf-8", errors="replace") as f:
                 spl = f.read()
         except FileNotFoundError:
             print(f"Error: File not found: {args.file}", file=sys.stderr)
             sys.exit(1)
-        except Exception as e:
+        except OSError as e:
             print(f"Error reading file: {e}", file=sys.stderr)
             sys.exit(1)
+    elif not sys.stdin.isatty():
+        spl = sys.stdin.read()
     else:
         parser.print_help()
         sys.exit(1)
@@ -302,52 +349,15 @@ def output_json(
     ast_mode: str = "summary",
 ):
     """Output validation result as JSON."""
-    enabled = parse_warning_groups(warning_groups)
-    grouped = group_warnings(result.warnings, enabled_groups=enabled)
-    filtered_warnings = (
-        grouped.limits
-        + grouped.optimization
-        + grouped.style
-        + grouped.semantic
-        + grouped.schema
-        + grouped.diagnostic
-        + grouped.other
+    output = build_validation_json_dict(
+        result,
+        warning_groups=warning_groups,
+        debug_ast=debug_ast,
+        debug_flow=debug_flow,
+        debug_flow_format=debug_flow_format,
+        debug_flow_rendered=debug_flow_rendered,
+        ast_mode=ast_mode,
     )
-    output = {
-        "valid": result.is_valid,
-        "errors": [
-            {
-                "code": e.code,
-                "message": e.message,
-                "line": e.start.line,
-                "column": e.start.column,
-                "suggestion": e.suggestion
-            }
-            for e in result.errors
-        ],
-        "warnings": [
-            {
-                "code": w.code,
-                "message": w.message,
-                "line": w.start.line,
-                "column": w.start.column,
-                "suggestion": w.suggestion
-            }
-            for w in filtered_warnings
-        ]
-    }
-    if debug_ast is not None or debug_flow is not None:
-        dbg = {}
-        if debug_ast is not None:
-            dbg["ast_mode"] = ast_mode
-            dbg["ast"] = debug_ast
-        if debug_flow is not None:
-            dbg["flow_format"] = debug_flow_format
-            if debug_flow_format == "json":
-                dbg["flow"] = debug_flow
-            else:
-                dbg[f"flow_{debug_flow_format}"] = debug_flow_rendered
-        output["debug"] = dbg
     print(json.dumps(output, indent=2))
 
 

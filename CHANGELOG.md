@@ -8,7 +8,6 @@ All notable changes to this project are documented here.
 
 - Command registry entries for common Splunk features used in real content: **mstats**, **mcatalog**, **mpreview**, **mcollect**, MLTK-style **apply** / **fit** / **summary** / **listmodels** / **deletemodel** / **experiment**, **sample**, **walklex**, and Splunkbase **cyberchef** (see `spl_validator/src/registry/commands.py`).
 - `docs/scalability.md`: complexity and throughput notes for operators.
-- `docs/security_content_23_invalid_analysis.md`: manual review of each strict-mode invalid detection in a sample `security_content` clone.
 
 ### Added (earlier in this branch)
 

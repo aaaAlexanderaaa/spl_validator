@@ -17,3 +17,6 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Local scratch (experiments, conversation notes, generated JSON — not committed)
+tmp/

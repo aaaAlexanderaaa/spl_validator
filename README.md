@@ -78,4 +78,6 @@ By default the scanner uses **`strict=True`**: unknown SPL **commands** (SPL013)
 
 Findings from a sample scan are documented in [`docs/security_content_validation.md`](docs/security_content_validation.md). Optional pytest: set `SECURITY_CONTENT_ROOT` and run `tests/test_security_content_scan.py` (also uses strict mode).
 
-For complexity / throughput characteristics, see [`docs/scalability.md`](docs/scalability.md). For a line-by-line review of strict-mode invalid ESCU-style searches, see [`docs/security_content_23_invalid_analysis.md`](docs/security_content_23_invalid_analysis.md).
+For complexity / throughput characteristics, see [`docs/scalability.md`](docs/scalability.md).
+
+Local scratch files (ad-hoc scripts, dumps from corpus scans) belong in **`tmp/`** at the repo root; that directory is **gitignored**.

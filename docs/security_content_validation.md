@@ -53,6 +53,8 @@ Almost all invalid rows share one **content-encoding pattern**: multi-line YAML 
 
 **Conclusion:** For those 17+ cases, the **detection logic is usually sound**, but **the YAML as stored is not equivalent to valid one-line SPL** if pasted verbatim into Splunk’s search bar. Packaging/import pipelines may normalize whitespace; the validator is correct for the literal string extracted by YAML.
 
+**Verification (heuristic):** Treating only **inside double-quoted** spans, replace each `newline + whitespace + | + whitespace` with a single `|` (regex alternation on one line). On a 2026-03-20 `security_content` clone, **16 of 23** strict-invalid searches become **valid** after that transform. The **7** that remain invalid are exactly the four MLTK `join [ summary … ]` cases (**SPL021**), plus sunburst **`| (`**, calc DLL **leading quote**, and punycode **unescaped `"` in `jsonrecipe`**—not fixable by line-wrap alone.
+
 ### Cases that look genuinely wrong as written (not just wrapping)
 
 1. **`endpoint/windows_dll_side_loading_in_calc.yml`** — Parsed `search` begins with a **leading single quote** before the macro (`` '`sysmon`\n...``). That opens a string literal and breaks the rest of the pipeline.
@@ -75,10 +77,6 @@ Includes, among others:
 - `endpoint/regsvr32_*.yml`, `endpoint/wmi_*_event_subscription.yml`, `endpoint/windows_ad_*.yml` (rex / match patterns split across lines)
 - `network/detect_snicat_sni_exfiltration.yml`
 - `web/windows_exchange_autodiscover_ssrf_abuse.yml`
-
-## Deep dive: the remaining invalid rows
-
-A **manual classification** of every strict-mode invalid detection (23 rows on a sample clone)—YAML wrap vs real bugs vs MLTK subsearch policy—is in [`security_content_23_invalid_analysis.md`](security_content_23_invalid_analysis.md).
 
 ## Maintenance
 

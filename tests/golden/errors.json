@@ -1,4 +1,5 @@
 {
+    "golden_format_version": 1,
     "tests": [
         {
             "name": "non_generating_first",

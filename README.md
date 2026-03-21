@@ -48,17 +48,30 @@ python3 -m spl_validator --file=query.spl --format=json
   - `--schema schema.json` enables field availability checks
   - `--schema-missing error|warning` controls severity when fields are known
 
+## Interfaces (CLI, HTTP API, TUI, browser extension)
+
+- **CLI** (stdin, positional SPL, presets): `python3 -m spl_validator --help`
+  - Pipe SPL: `echo 'index=web | stats count' | python3 -m spl_validator --format=json` (or `--stdin`)
+  - Positional: `python3 -m spl_validator --format=json 'index=web | stats count'`
+  - Presets: `--preset=strict` or `--preset=security_content` (strict + `--advice=all`)
+- **JSON contract**: machine output includes `output_schema_version` and `package_version` (see `spl_validator/contract.py`).
+- **HTTP API** (for integrations and the extension): `spl-validator-httpd --host 127.0.0.1 --port 8765` then `POST /validate` with JSON `{"spl":"...","strict":false,"advice":"optimization"}`; `GET /health`.
+- **TUI** (multiline editor, optional): `pip install -e ".[tui]"` then `spl-validator-tui` or `python3 -m spl_validator.tui_app`.
+- **Browser extension** (Chromium): open `chrome://extensions`, enable Developer Mode, **Load unpacked** → select the `browser_extension/` directory. Ensure the HTTP server is running and matches the URL in the extension options.
+
 ## Development
 
 Run tests from the repository root (after `pip install -e .`, or with `PYTHONPATH` set to the repo root):
 
 ```bash
 pip install -e ".[dev]"   # optional: pytest
+pip install -e ".[tui]"   # optional: Textual TUI
 python3 tests/test_basic.py
 python3 tests/test_golden.py
 python3 tests/test_parser.py
 python3 -m pytest tests/test_functions_registry.py  # every SPL function: syntax, category, arity, command mapping
 pytest tests/             # if using pytest discovery (optional)
+pytest tests/test_interfaces.py  # CLI contract + HTTP API smoke tests
 ```
 
 ## Reference

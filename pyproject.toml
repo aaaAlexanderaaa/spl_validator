@@ -16,6 +16,13 @@ dependencies = [
 dev = [
     "pytest>=7.0",
 ]
+tui = [
+    "textual>=0.47.0",
+]
+
+[project.scripts]
+spl-validator-httpd = "spl_validator.httpd:main"
+spl-validator-tui = "spl_validator.tui_app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

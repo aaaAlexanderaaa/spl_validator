@@ -7,6 +7,7 @@ import sys
 _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, _repo_root)
 
+from spl_validator.contract import GOLDEN_FILE_FORMAT_VERSION
 from spl_validator.core import validate
 
 
@@ -17,6 +18,14 @@ def run_golden_tests(test_file: str) -> tuple[int, int]:
     """
     with open(test_file) as f:
         data = json.load(f)
+
+    gv = int(data.get("golden_format_version", 1))
+    if gv > GOLDEN_FILE_FORMAT_VERSION:
+        print(
+            f"  ❌ Unsupported golden_format_version={gv} in {test_file} "
+            f"(runner supports up to {GOLDEN_FILE_FORMAT_VERSION})"
+        )
+        return 0, 1
     
     passed = 0
     total = 0

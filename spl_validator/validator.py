@@ -7,6 +7,7 @@ if __name__ == "__main__" and __package__ is None:
     print("", file=sys.stderr)
     print("Use this command instead (from the repository root):", file=sys.stderr)
     print("  python3 -m spl_validator --spl=\"your SPL query\"", file=sys.stderr)
+    print("  python3 -m spl_validator < query.spl", file=sys.stderr)
     sys.exit(1)
 
 import argparse
@@ -14,34 +15,69 @@ import sys
 import json
 from typing import Optional
 
+from .cli_config import argparse_defaults_from_config, discover_config_path, load_cli_defaults
 from .core import validate
+from .json_payload import build_cli_json_dict
 from .src.models import Severity
 from .src.models.warning_groups import group_warnings, parse_warning_groups
+from .src.registry.pack import load_registry_pack_file
 
 
 def main():
     """CLI entry point."""
+    pre = argparse.ArgumentParser(add_help=False)
+    pre.add_argument("--config", default=None)
+    pre_ns, _ = pre.parse_known_args(sys.argv[1:])
+    cfg_path = discover_config_path(pre_ns.config)
+    cfg_arg_defaults: dict = {}
+    config_packs: list[str] = []
+    if cfg_path and cfg_path.is_file():
+        try:
+            raw = load_cli_defaults(cfg_path)
+            cfg_arg_defaults, config_packs = argparse_defaults_from_config(raw)
+        except ValueError as e:
+            print(f"Error in config file {cfg_path}: {e}", file=sys.stderr)
+            sys.exit(1)
+
     parser = argparse.ArgumentParser(
         description="SPL Validator - Validates Splunk SPL queries",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   python3 -m spl_validator --spl="index=web | stats count BY host"
-  python3 -m spl_validator --spl="| stats count" --format=json
+  python3 -m spl_validator 'index=web | stats count'
   python3 -m spl_validator --file=query.spl
-  python3 -m spl_validator --strict --spl="index=web | `my_macro(arg)` | stats count"
+  python3 -m spl_validator < query.spl
+  cat query.spl | python3 -m spl_validator --format=json
+  python3 -m spl_validator --registry-pack=spl_validator/registry_packs/example_pack.yaml \\
+      --spl "index=* | mycustomcmd"
         """
     )
-    
+    if cfg_arg_defaults:
+        parser.set_defaults(**cfg_arg_defaults)
+
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        help="YAML defaults file (also: $SPL_VALIDATOR_CONFIG or ./.spl-validator.yaml)",
+    )
     parser.add_argument(
         "--spl",
         type=str,
-        help="SPL query string to validate"
+        help="SPL query string to validate",
     )
     parser.add_argument(
         "--file",
         type=str,
-        help="Path to file containing SPL query"
+        help="Path to file containing SPL query",
+    )
+    parser.add_argument(
+        "--registry-pack",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="YAML registry pack to merge (repeatable); see spl_validator/registry_packs/",
     )
     parser.add_argument(
         "--format",
@@ -103,7 +139,13 @@ Examples:
             "limits,optimization,style,semantic,schema,diagnostic,other"
         ),
     )
-    
+    parser.add_argument(
+        "query",
+        nargs="?",
+        default=None,
+        help="SPL query as a positional argument (alternative to --spl)",
+    )
+
     args = parser.parse_args()
 
     # Validate --advice early so typos produce an argparse-style error message.
@@ -111,23 +153,44 @@ Examples:
         parse_warning_groups(args.advice)
     except ValueError as e:
         parser.error(str(e))
-    
-    # Get SPL from args or file
+
+    for pack_path in config_packs:
+        try:
+            load_registry_pack_file(pack_path)
+        except (OSError, ValueError) as e:
+            print(f"Error loading registry pack {pack_path!r}: {e}", file=sys.stderr)
+            sys.exit(1)
+    for pack_path in args.registry_pack or []:
+        try:
+            load_registry_pack_file(pack_path)
+        except (OSError, ValueError) as e:
+            print(f"Error loading registry pack {pack_path!r}: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    # Get SPL: --spl > --file > positional > stdin (non-TTY)
     spl: Optional[str] = None
-    if args.spl:
+    if args.spl is not None:
         spl = args.spl
     elif args.file:
         try:
-            with open(args.file, "r") as f:
+            with open(args.file, "r", encoding="utf-8") as f:
                 spl = f.read()
         except FileNotFoundError:
             print(f"Error: File not found: {args.file}", file=sys.stderr)
             sys.exit(1)
-        except Exception as e:
+        except OSError as e:
             print(f"Error reading file: {e}", file=sys.stderr)
             sys.exit(1)
+    elif args.query is not None:
+        spl = args.query
+    elif not sys.stdin.isatty():
+        spl = sys.stdin.read()
     else:
         parser.print_help()
+        print(
+            "\nProvide SPL via --spl, --file, a positional query, or pipe/heredoc on stdin.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     
     schema_fields = None
@@ -302,52 +365,15 @@ def output_json(
     ast_mode: str = "summary",
 ):
     """Output validation result as JSON."""
-    enabled = parse_warning_groups(warning_groups)
-    grouped = group_warnings(result.warnings, enabled_groups=enabled)
-    filtered_warnings = (
-        grouped.limits
-        + grouped.optimization
-        + grouped.style
-        + grouped.semantic
-        + grouped.schema
-        + grouped.diagnostic
-        + grouped.other
+    output = build_cli_json_dict(
+        result,
+        warning_groups=warning_groups,
+        debug_ast=debug_ast,
+        debug_flow=debug_flow,
+        debug_flow_format=debug_flow_format,
+        debug_flow_rendered=debug_flow_rendered,
+        ast_mode=ast_mode,
     )
-    output = {
-        "valid": result.is_valid,
-        "errors": [
-            {
-                "code": e.code,
-                "message": e.message,
-                "line": e.start.line,
-                "column": e.start.column,
-                "suggestion": e.suggestion
-            }
-            for e in result.errors
-        ],
-        "warnings": [
-            {
-                "code": w.code,
-                "message": w.message,
-                "line": w.start.line,
-                "column": w.start.column,
-                "suggestion": w.suggestion
-            }
-            for w in filtered_warnings
-        ]
-    }
-    if debug_ast is not None or debug_flow is not None:
-        dbg = {}
-        if debug_ast is not None:
-            dbg["ast_mode"] = ast_mode
-            dbg["ast"] = debug_ast
-        if debug_flow is not None:
-            dbg["flow_format"] = debug_flow_format
-            if debug_flow_format == "json":
-                dbg["flow"] = debug_flow
-            else:
-                dbg[f"flow_{debug_flow_format}"] = debug_flow_rendered
-        output["debug"] = dbg
     print(json.dumps(output, indent=2))
 
 

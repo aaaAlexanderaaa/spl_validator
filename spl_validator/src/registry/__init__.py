@@ -4,15 +4,19 @@ from .commands import (
     get_command, is_generating_command, is_known_command
 )
 from .functions import (
-    FunctionDef, FUNCTIONS,
-    get_function, is_known_function,
-    validate_function_arity, validate_function_context
+    EVAL_EXPRESSION_COMMANDS,
+    FunctionDef, FUNCTIONS, STATS_AGGREGATION_COMMANDS,
+    get_function, is_known_function, iter_percentile_examples,
+    validate_function_arity, validate_function_context,
 )
 
 __all__ = [
     'CommandDef', 'COMMANDS', 'GENERATING_COMMANDS',
     'get_command', 'is_generating_command', 'is_known_command',
+    'EVAL_EXPRESSION_COMMANDS',
     'FunctionDef', 'FUNCTIONS',
+    'STATS_AGGREGATION_COMMANDS',
     'get_function', 'is_known_function',
-    'validate_function_arity', 'validate_function_context'
+    'iter_percentile_examples',
+    'validate_function_arity', 'validate_function_context',
 ]

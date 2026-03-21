@@ -2,6 +2,10 @@
 
 Designed for large corpora: streams files in deterministic order and exits on the
 first invalid SPL search. YAML parsing errors are reported and skipped.
+
+Default ``strict=False`` (unknown commands are warnings) for backward compatibility with
+existing automation. Pass ``strict=True`` to ``run()`` or use ``--strict`` on the CLI so
+unknown commands become SPL013 errors (registry-gap auditing).
 """
 
 from __future__ import annotations
@@ -94,6 +98,7 @@ def run(
     output_format: str,
     max_yaml_error_logs: int,
     skip_files: set[Path],
+    strict: bool = False,
 ) -> int:
     stats = RunStats()
 
@@ -129,7 +134,7 @@ def run(
             continue
 
         stats.validated_searches += 1
-        result = validate(search, strict=False)
+        result = validate(search, strict=strict)
         if result.is_valid:
             continue
 
@@ -212,6 +217,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="Output format on stop/finish (default: text).",
     )
     parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Unknown commands are errors (SPL013). Default: unknown commands are warnings only.",
+    )
+    parser.add_argument(
         "--max-yaml-error-logs",
         type=int,
         default=20,
@@ -248,6 +258,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         output_format=args.format,
         max_yaml_error_logs=args.max_yaml_error_logs,
         skip_files=skip_files,
+        strict=args.strict,
     )
 
 

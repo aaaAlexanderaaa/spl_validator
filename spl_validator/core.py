@@ -1572,7 +1572,12 @@ def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
 
 
 def validate_functions(pipeline: Pipeline, result: ValidationResult) -> None:
-    """Validate function usage in pipeline (arity, context)."""
+    """Validate function usage in pipeline (arity, context).
+
+    Walks parsed expression trees for ``eval`` and ``where``. Stats-style commands
+    validate top-level aggregations separately during parsing. ``fieldformat`` format
+    strings are not re-lexed for nested function calls; see ``FunctionDef.command_usage_summary``.
+    """
     from .src.parser.ast import FunctionCall
     
     for cmd in pipeline.commands:
@@ -1619,29 +1624,41 @@ def _find_function_calls(expr):
 
 def _validate_single_function(func_call, context: str, result: ValidationResult) -> None:
     """Validate a single function call."""
-    from .src.registry.functions import validate_function_arity, validate_function_context
+    from .src.registry.functions import (
+        is_known_function,
+        validate_function_arity,
+        validate_function_context,
+    )
     from .src.parser.ast import FunctionCall
-    
-    # Check arity
-    arity_error = validate_function_arity(func_call.name, len(func_call.args), context=context)
-    if arity_error:
+
+    if not is_known_function(func_call.name):
         result.add_error(
-            "SPL020",
-            arity_error,
+            "SPL023",
+            f"Unknown function '{func_call.name}'",
             func_call.start,
-            func_call.end
+            func_call.end,
         )
-    
-    # Check context
-    context_error = validate_function_context(func_call.name, context)
-    if context_error:
-        result.add_error(
-            "SPL021",
-            context_error,
-            func_call.start,
-            func_call.end
-        )
-    
+    else:
+        # Check arity
+        arity_error = validate_function_arity(func_call.name, len(func_call.args), context=context)
+        if arity_error:
+            result.add_error(
+                "SPL020",
+                arity_error,
+                func_call.start,
+                func_call.end
+            )
+
+        # Check context
+        context_error = validate_function_context(func_call.name, context)
+        if context_error:
+            result.add_error(
+                "SPL021",
+                context_error,
+                func_call.start,
+                func_call.end
+            )
+
     # Recursively check nested function calls
     for arg in func_call.args:
         if isinstance(arg, FunctionCall):

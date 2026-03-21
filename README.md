@@ -13,7 +13,7 @@ From the repository root (editable install recommended):
 pip install -e .
 ```
 
-This installs the `spl_validator` package and the **PyYAML** dependency used by `spl_validator.tools.validate_detections`.
+This installs the `spl_validator` package and the **PyYAML** dependency used by `spl_validator.tools.validate_detections` (optional **`--strict`** treats unknown commands as errors). For **security_content**-style audits, prefer `tools/scan_external_detections.py`, which defaults to strict mode.
 
 ## Quickstart
 
@@ -57,6 +57,7 @@ pip install -e ".[dev]"   # optional: pytest
 python3 tests/test_basic.py
 python3 tests/test_golden.py
 python3 tests/test_parser.py
+python3 -m pytest tests/test_functions_registry.py  # every SPL function: syntax, category, arity, command mapping
 pytest tests/             # if using pytest discovery (optional)
 ```
 
@@ -64,3 +65,17 @@ pytest tests/             # if using pytest discovery (optional)
 
 - Supported commands: `spl_validator/src/registry/commands.py`
 - Supported functions: `spl_validator/src/registry/functions.py`
+
+## External corpus (splunk/security_content)
+
+To batch-validate detection YAML from [splunk/security_content](https://github.com/splunk/security_content):
+
+```bash
+python3 tools/scan_external_detections.py --root /path/to/security_content/detections
+```
+
+By default the scanner uses **`strict=True`**: unknown SPL **commands** (SPL013) and unknown **functions** (SPL023) make a search invalid, so registry coverage affects the score. Use **`--loose`** if you only want parse/syntax errors without treating unknown commands as fatal.
+
+Findings from a sample scan are documented in [`docs/security_content_validation.md`](docs/security_content_validation.md). Optional pytest: set `SECURITY_CONTENT_ROOT` and run `tests/test_security_content_scan.py` (also uses strict mode).
+
+For complexity / throughput characteristics, see [`docs/scalability.md`](docs/scalability.md). For a line-by-line review of strict-mode invalid ESCU-style searches, see [`docs/security_content_23_invalid_analysis.md`](docs/security_content_23_invalid_analysis.md).

@@ -76,6 +76,10 @@ Includes, among others:
 - `network/detect_snicat_sni_exfiltration.yml`
 - `web/windows_exchange_autodiscover_ssrf_abuse.yml`
 
+## Deep dive: the remaining invalid rows
+
+A **manual classification** of every strict-mode invalid detection (23 rows on a sample clone)—YAML wrap vs real bugs vs MLTK subsearch policy—is in [`security_content_23_invalid_analysis.md`](security_content_23_invalid_analysis.md).
+
 ## Maintenance
 
 Upstream may fix YAML formatting over time; re-run the scanner after major pulls. The optional pytest uses **`strict=True`** and expects at least **97%** valid (see `tests/test_security_content_scan.py`)—it does **not** require zero invalid searches.

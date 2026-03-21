@@ -933,6 +933,136 @@ COMMANDS: dict[str, CommandDef] = {
         clauses=[],
         limit_key=None
     ),
+
+    # === METRICS (mstats / mcatalog / mpreview — Splunk Enterprise metrics) ===
+    "mstats": CommandDef(
+        name="mstats",
+        type="generating",
+        required_args=["aggregation"],
+        optional_args={
+            "local": bool,
+            "append": bool,
+            "chunk_size": int,
+            "span": str,
+            "align_timestamp": str,
+            "prestats": bool,
+            "indexes": str,
+        },
+        clauses=["WHERE", "BY", "GROUPBY", "FROM"],
+        limit_key=None,
+    ),
+    "mcatalog": CommandDef(
+        name="mcatalog",
+        type="generating",
+        required_args=[],
+        optional_args={"local": bool},
+        clauses=["WHERE"],
+        limit_key=None,
+    ),
+    "mpreview": CommandDef(
+        name="mpreview",
+        type="generating",
+        required_args=[],
+        optional_args={},
+        clauses=[],
+        limit_key=None,
+    ),
+    "mcollect": CommandDef(
+        name="mcollect",
+        type="streaming",
+        required_args=[],
+        optional_args={
+            "index": str,
+            "source": str,
+            "sourcetype": str,
+            "host": str,
+            "split": str,
+            "marker": str,
+        },
+        clauses=[],
+        limit_key=None,
+    ),
+
+    # === MLTK / SPL machine-learning commands (common in security content) ===
+    "apply": CommandDef(
+        name="apply",
+        type="streaming",
+        required_args=[],
+        optional_args={},
+        clauses=[],
+        limit_key=None,
+    ),
+    "fit": CommandDef(
+        name="fit",
+        type="transforming",
+        required_args=[],
+        optional_args={},
+        clauses=[],
+        limit_key=None,
+    ),
+    "summary": CommandDef(
+        name="summary",
+        type="transforming",
+        required_args=[],
+        optional_args={},
+        clauses=[],
+        limit_key=None,
+    ),
+    "listmodels": CommandDef(
+        name="listmodels",
+        type="streaming",
+        required_args=[],
+        optional_args={},
+        clauses=[],
+        limit_key=None,
+    ),
+    "deletemodel": CommandDef(
+        name="deletemodel",
+        type="streaming",
+        required_args=[],
+        optional_args={},
+        clauses=[],
+        limit_key=None,
+    ),
+    "sample": CommandDef(
+        name="sample",
+        type="streaming",
+        required_args=[],
+        optional_args={"prob": float, "count": int, "seed": int},
+        clauses=[],
+        limit_key=None,
+    ),
+    "experiment": CommandDef(
+        name="experiment",
+        type="transforming",
+        required_args=[],
+        optional_args={},
+        clauses=[],
+        limit_key=None,
+    ),
+
+    # === INDEX / LEX / APP EXTENSIONS (frequent in real deployments) ===
+    "walklex": CommandDef(
+        name="walklex",
+        type="generating",
+        required_args=[],
+        optional_args={"type": str, "index": str},
+        clauses=[],
+        limit_key=None,
+    ),
+    "cyberchef": CommandDef(
+        name="cyberchef",
+        type="streaming",
+        required_args=[],
+        optional_args={
+            "infield": str,
+            "outfield": str,
+            "recipe": str,
+            "jsonrecipe": str,
+        },
+        clauses=[],
+        limit_key=None,
+    ),
 }
 
 

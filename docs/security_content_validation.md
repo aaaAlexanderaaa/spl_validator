@@ -40,10 +40,10 @@ Pass **`--loose`** to use `strict=False` (unknown commands are **SPL006** warnin
 | Metric | `strict=True` (default) | `--loose` (`strict=False`) |
 |--------|------------------------:|---------------------------:|
 | YAML files with `search` | 2006 | 2006 |
-| Valid | 1961 | 1987 |
-| Invalid | 45 | 19 |
+| Valid (2026-03-20 clone, after metrics/MLTK/cyberchef registry expansion) | **1983** | 1987 |
+| Invalid | **23** | 19 |
 
-The **26** extra invalid rows under strict mode are almost entirely **SPL013** for real Splunk commands not yet in this validator’s registry (e.g. `mstats`, `apply`, `fit`, `summary`, and DSDL / MLTK helpers). Those searches are not “broken”; expanding `commands.py` will clear them.
+Remaining strict-only invalid rows are mostly **SPL013** for less common add-on or app commands, plus the same YAML line-wrap / quote issues as before. Expanding `commands.py` further or fixing YAML formatting reduces the count.
 
 Dominant error codes on **other** invalid rows: **SPL004** (unclosed string), **SPL011** / **SPL006** (parse recovery), **SPL007**, **SPL014**, plus **SPL020** / **SPL021** / **SPL023** where applicable.
 

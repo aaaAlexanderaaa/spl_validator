@@ -77,3 +77,5 @@ python3 tools/scan_external_detections.py --root /path/to/security_content/detec
 By default the scanner uses **`strict=True`**: unknown SPL **commands** (SPL013) and unknown **functions** (SPL023) make a search invalid, so registry coverage affects the score. Use **`--loose`** if you only want parse/syntax errors without treating unknown commands as fatal.
 
 Findings from a sample scan are documented in [`docs/security_content_validation.md`](docs/security_content_validation.md). Optional pytest: set `SECURITY_CONTENT_ROOT` and run `tests/test_security_content_scan.py` (also uses strict mode).
+
+For complexity / throughput characteristics, see [`docs/scalability.md`](docs/scalability.md).

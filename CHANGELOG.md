@@ -6,6 +6,11 @@ All notable changes to this project are documented here.
 
 ### Added
 
+- Command registry entries for common Splunk features used in real content: **mstats**, **mcatalog**, **mpreview**, **mcollect**, MLTK-style **apply** / **fit** / **summary** / **listmodels** / **deletemodel** / **experiment**, **sample**, **walklex**, and Splunkbase **cyberchef** (see `spl_validator/src/registry/commands.py`).
+- `docs/scalability.md`: complexity and throughput notes for operators.
+
+### Added (earlier in this branch)
+
 - SPL function registry metadata: categories, syntax strings, eval/stats command hints (`spl_validator/src/registry/functions.py`).
 - **SPL023**: unknown function name (eval/where and stats aggregations). Arity issues remain **SPL020**; wrong eval/stats context remains **SPL021**.
 - `tools/scan_external_detections.py`: batch-validate YAML `search` fields (e.g. `splunk/security_content`), **`strict=True` by default**; **`--loose`** for legacy behavior.

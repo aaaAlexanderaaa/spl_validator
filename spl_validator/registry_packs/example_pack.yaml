@@ -1,0 +1,12 @@
+# Example pack: registers a fictional transforming command for demos/tests.
+version: 1
+commands:
+  mycustomcmd:
+    type: transforming
+    required_args: []
+    optional_args:
+      mode: str
+    clauses: []
+    limit_key: null
+aliases:
+  mcc: mycustomcmd

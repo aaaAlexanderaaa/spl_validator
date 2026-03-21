@@ -1,0 +1,6 @@
+# Copy to `.spl-validator.yaml` in the working directory or set SPL_VALIDATOR_CONFIG.
+strict: false
+format: text
+advice: optimization
+# registry_pack:
+#   - spl_validator/registry_packs/example_pack.yaml

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/spl-validator/cli-json-output",
+  "title": "SPL Validator CLI default JSON output",
+  "type": "object",
+  "required": ["valid", "errors", "warnings"],
+  "additionalProperties": true,
+  "properties": {
+    "valid": { "type": "boolean" },
+    "errors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issue" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issue" }
+    },
+    "debug": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "issue": {
+      "type": "object",
+      "required": ["code", "message", "line", "column"],
+      "additionalProperties": true,
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "line": { "type": "integer" },
+        "column": { "type": "integer" },
+        "suggestion": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

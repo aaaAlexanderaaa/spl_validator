@@ -1065,6 +1065,10 @@ COMMANDS: dict[str, CommandDef] = {
     ),
 }
 
+# --- Optional pack extensions (loaded from YAML at runtime; see registry/pack.py) ---
+_EXTRA_COMMANDS: dict[str, CommandDef] = {}
+_PACK_ALIASES: dict[str, str] = {}
+
 
 # Command aliases (from searchbnf.conf)
 # Maps alias -> canonical command name
@@ -1076,30 +1080,54 @@ COMMAND_ALIASES: dict[str, str] = {
 }
 
 
-# Generating commands that can start a pipeline
+# Generating commands that can start a pipeline (built-in registry only)
 GENERATING_COMMANDS = {name for name, cmd in COMMANDS.items() if cmd.type == "generating"}
+
+
+def _canonical_command_name(key: str) -> str:
+    """Resolve lowercase command token to canonical registry key."""
+    if key in COMMAND_ALIASES:
+        return COMMAND_ALIASES[key]
+    if key in _PACK_ALIASES:
+        return _PACK_ALIASES[key]
+    return key
 
 
 def get_command(name: str) -> Optional[CommandDef]:
     """Get command definition by name (case-insensitive).
 
-    Resolves command aliases to their canonical names.
+    Resolves command aliases to their canonical names (built-in aliases first, then pack).
     """
     key = name.lower()
-    # Resolve alias to canonical name
-    canonical = COMMAND_ALIASES.get(key, key)
-    return COMMANDS.get(canonical)
+    canonical = _canonical_command_name(key)
+    return COMMANDS.get(canonical) or _EXTRA_COMMANDS.get(canonical)
 
 
 def is_generating_command(name: str) -> bool:
-    """Check if command is a generating command."""
-    key = name.lower()
-    canonical = COMMAND_ALIASES.get(key, key)
-    return canonical in GENERATING_COMMANDS
+    """Check if command is a generating command (built-in or pack)."""
+    cmd = get_command(name)
+    return cmd is not None and cmd.type == "generating"
 
 
 def is_known_command(name: str) -> bool:
     """Check if command is known to the validator."""
     key = name.lower()
-    canonical = COMMAND_ALIASES.get(key, key)
-    return canonical in COMMANDS
+    canonical = _canonical_command_name(key)
+    return canonical in COMMANDS or canonical in _EXTRA_COMMANDS
+
+
+def reset_registry_packs() -> None:
+    """Clear pack-registered commands and aliases (for tests)."""
+    _EXTRA_COMMANDS.clear()
+    _PACK_ALIASES.clear()
+
+
+def apply_command_pack(
+    commands: dict[str, CommandDef],
+    aliases: Optional[dict[str, str]] = None,
+) -> None:
+    """Merge definitions from a registry pack (additive; does not remove built-ins)."""
+    _EXTRA_COMMANDS.update(commands)
+    if aliases:
+        for alias, target in aliases.items():
+            _PACK_ALIASES[alias.lower()] = target.lower()

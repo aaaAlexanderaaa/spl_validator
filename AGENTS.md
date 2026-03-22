@@ -22,4 +22,6 @@ It consists of two products: a **Python package** (CLI + HTTP API + optional TUI
 - `tests/test_security_content_scan.py` and the TUI headless smoke test are intentionally skipped unless specific env vars (`SECURITY_CONTENT_ROOT`, `RUN_TUI_HEADLESS_SMOKE`) are set.
 - The HTTP server is stdlib-only (`http.server.ThreadingHTTPServer`) — no Flask/FastAPI dependency needed.
 - Python >=3.10 is required (uses `match` statements and `X | Y` union types).
+- Browser extension E2E tests require Playwright Chromium (`npx playwright install chromium`) and `xvfb` (`sudo apt install xvfb`). Run via `xvfb-run -a npm run test:e2e` from `browser_extension/`. Playwright auto-starts the HTTP server on port 19999 for E2E.
+- The E2E test launches Chromium in non-headless mode with `--load-extension`; xvfb provides the virtual display on headless Linux.
 - See `README.md` for the full development setup and CLI usage reference.

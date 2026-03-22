@@ -17,7 +17,6 @@ test.describe.configure({ mode: "serial" });
 
 test("options + popup validate SPL against local httpd", async () => {
   const context = await chromium.launchPersistentContext(userDataDir, {
-    channel: "chromium",
     headless: false,
     args: [
       `--disable-extensions-except=${pathToExtension}`,

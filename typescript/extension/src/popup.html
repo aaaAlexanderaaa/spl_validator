@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SPL Validator</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 12px;
+        width: 420px;
+      }
+      textarea {
+        width: 100%;
+        height: 140px;
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+      }
+      button {
+        margin-top: 8px;
+      }
+      pre {
+        white-space: pre-wrap;
+        font-size: 11px;
+        max-height: 200px;
+        overflow: auto;
+        background: #f4f4f4;
+        padding: 8px;
+      }
+      .ok {
+        color: #0a0;
+      }
+      .bad {
+        color: #a00;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>SPL Validator</h3>
+    <textarea id="spl" placeholder="index=_internal | head 5"></textarea>
+    <button id="go" type="button">Validate</button>
+    <p id="status"></p>
+    <pre id="out"></pre>
+    <script src="popup.js"></script>
+  </body>
+</html>

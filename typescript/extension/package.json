@@ -1,0 +1,14 @@
+{
+  "name": "@spl-validator/extension",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@spl-validator/core": "*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2"
+  }
+}

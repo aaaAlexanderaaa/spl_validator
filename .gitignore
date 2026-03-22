@@ -12,6 +12,7 @@ venv/
 
 build/
 dist/
+node_modules/
 *.egg-info/
 
 .DS_Store

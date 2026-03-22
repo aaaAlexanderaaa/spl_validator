@@ -35,7 +35,7 @@ On branch **`prod`**, the same validator also ships:
 
 - **HTTP**: `python3 -m spl_validator.httpd` then `POST /validate` with JSON `{"spl":"..."}` (CORS enabled for local tooling).
 - **TUI**: `pip install -e ".[tui]"` then `python3 -m spl_validator.tui` or `spl-validator-tui`.
-- **Browser**: load `browser_extension/` as an unpacked extension; it talks to the local HTTP server.
+- **Browser**: build `browser_extension/dist` (`npm run build` in `browser_extension/`) and load that folder as unpacked; it talks to the local HTTP server.
 - **Contract**: JSON Schema for default API output in `docs/contract/cli-json-output.schema.json` (for ports / CI).
 
 Full roadmap: [`PLAN.md`](PLAN.md).
@@ -65,17 +65,32 @@ Full roadmap: [`PLAN.md`](PLAN.md).
   - `--schema schema.json` enables field availability checks
   - `--schema-missing error|warning` controls severity when fields are known
 
+## Interfaces (CLI, HTTP API, TUI, browser extension)
+
+- **CLI** (stdin, positional SPL, presets): `python3 -m spl_validator --help`
+  - Pipe SPL: `echo 'index=web | stats count' | python3 -m spl_validator --format=json` (or `--stdin`)
+  - Positional: `python3 -m spl_validator --format=json 'index=web | stats count'`
+  - Presets: `--preset=strict` or `--preset=security_content` (strict + `--advice=all`)
+- **JSON contract**: machine output includes `output_schema_version` and `package_version` (see `spl_validator/contract.py`).
+- **HTTP API** (for integrations and the extension): `spl-validator-httpd --host 127.0.0.1 --port 8765` then `POST /validate` with JSON `{"spl":"...","strict":false,"advice":"optimization"}`; `GET /health`.
+- **TUI** (multiline editor, optional): `pip install -e ".[tui]"` then `spl-validator-tui` or `python3 -m spl_validator.tui_app`.
+- **Browser extension** (Chromium): build `browser_extension/dist` with `cd browser_extension && npm install && npm run build`, then **Load unpacked** → pick **`browser_extension/dist`**. Run `spl-validator-httpd` and set the API URL in extension options (defaults to `http://127.0.0.1:8765`). Automated checks: `npm test` (esbuild bundle + Node mocks) and `xvfb-run -a npm run test:e2e` (Playwright loads the real extension against the Python httpd), or run `./tools/run_browser_extension_e2e.sh` from the repo root.
+
 ## Development
+
+**Environment setup** (recommended): from the repository root run `./tools/setup_environment.sh`. It creates `.venv/`, installs `spl-validator` in editable mode with **`[dev,tui]`** extras, runs `npm ci` under `browser_extension/`, and installs Playwright’s Chromium build for extension e2e tests. Activate the venv with `source .venv/bin/activate`.
 
 Run tests from the repository root (after `pip install -e .`, or with `PYTHONPATH` set to the repo root):
 
 ```bash
 pip install -e ".[dev]"   # pytest + jsonschema (contract tests)
+pip install -e ".[tui]"   # optional: Textual TUI
 python3 tests/test_basic.py
 python3 tests/test_golden.py
 python3 tests/test_parser.py
 python3 -m pytest tests/test_functions_registry.py  # every SPL function: syntax, category, arity, command mapping
 python3 -m pytest tests/  # includes registry pack, CLI I/O, JSON schema contract
+pytest tests/test_interfaces.py  # CLI contract + HTTP API smoke tests
 ```
 
 ## Reference

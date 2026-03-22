@@ -3,22 +3,22 @@
 # Guard: Detect direct execution and show helpful error
 if __name__ == "__main__" and __package__ is None:
     import sys
+
     print("Error: Cannot run validator.py directly due to relative imports.", file=sys.stderr)
     print("", file=sys.stderr)
     print("Use this command instead (from the repository root):", file=sys.stderr)
-    print("  python3 -m spl_validator --spl=\"your SPL query\"", file=sys.stderr)
+    print('  python3 -m spl_validator --spl="your SPL query"', file=sys.stderr)
     print("  python3 -m spl_validator < query.spl", file=sys.stderr)
     sys.exit(1)
 
 import argparse
-import sys
 import json
+import sys
 from typing import Optional
 
 from .cli_config import argparse_defaults_from_config, discover_config_path, load_cli_defaults
 from .core import validate
-from .json_payload import build_cli_json_dict
-from .src.models import Severity
+from .json_payload import build_validation_json_dict
 from .src.models.warning_groups import group_warnings, parse_warning_groups
 from .src.registry.pack import load_registry_pack_file
 
@@ -45,13 +45,17 @@ def main():
         epilog="""
 Examples:
   python3 -m spl_validator --spl="index=web | stats count BY host"
+  python3 -m spl_validator "index=web | stats count BY host"
   python3 -m spl_validator 'index=web | stats count'
+  echo 'index=web | stats count' | python3 -m spl_validator --stdin --format=json
   python3 -m spl_validator --file=query.spl
+  python3 -m spl_validator --file=- < query.spl
   python3 -m spl_validator < query.spl
   cat query.spl | python3 -m spl_validator --format=json
+  python3 -m spl_validator --preset=security_content --spl="index=web | stats count"
   python3 -m spl_validator --registry-pack=spl_validator/registry_packs/example_pack.yaml \\
       --spl "index=* | mycustomcmd"
-        """
+        """,
     )
     if cfg_arg_defaults:
         parser.set_defaults(**cfg_arg_defaults)
@@ -63,6 +67,12 @@ Examples:
         help="YAML defaults file (also: $SPL_VALIDATOR_CONFIG or ./.spl-validator.yaml)",
     )
     parser.add_argument(
+        "spl_positional",
+        nargs="?",
+        metavar="SPL",
+        help="SPL query (alternative to --spl or --file)",
+    )
+    parser.add_argument(
         "--spl",
         type=str,
         help="SPL query string to validate",
@@ -70,7 +80,22 @@ Examples:
     parser.add_argument(
         "--file",
         type=str,
-        help="Path to file containing SPL query",
+        help="Path to file containing SPL query (use '-' for stdin)",
+    )
+    parser.add_argument(
+        "--stdin",
+        action="store_true",
+        help="Read SPL from standard input (same as --file=-)",
+    )
+    parser.add_argument(
+        "--preset",
+        choices=("default", "strict", "security_content"),
+        default=None,
+        help=(
+            "Configuration preset: default (loose commands, optimization advice), "
+            "strict (unknown commands are errors), "
+            "security_content (strict + all advice groups; aligns with ESCU-style scanning)"
+        ),
     )
     parser.add_argument(
         "--registry-pack",
@@ -83,51 +108,51 @@ Examples:
         "--format",
         choices=["text", "json"],
         default="text",
-        help="Output format (default: text)"
+        help="Output format (default: text)",
     )
     parser.add_argument(
         "--verbose",
         action="store_true",
-        help="Show detailed output"
+        help="Show detailed output",
     )
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Treat unknown commands as errors (macros still allowed)"
+        help="Treat unknown commands as errors (macros still allowed)",
     )
 
     parser.add_argument(
         "--dump-ast",
         action="store_true",
-        help="Dump parsed AST (summary/full) for debugging"
+        help="Dump parsed AST (summary/full) for debugging",
     )
     parser.add_argument(
         "--ast-mode",
         choices=["summary", "full"],
         default="summary",
-        help="AST dump detail level (default: summary)"
+        help="AST dump detail level (default: summary)",
     )
     parser.add_argument(
         "--dump-flow",
         action="store_true",
-        help="Dump simulated data-flow sketch (fields/actions)"
+        help="Dump simulated data-flow sketch (fields/actions)",
     )
     parser.add_argument(
         "--flow-format",
         choices=["text", "json", "dot"],
         default="text",
-        help="Flow dump output format (default: text)"
+        help="Flow dump output format (default: text)",
     )
     parser.add_argument(
         "--schema",
         type=str,
-        help="Optional dataset schema file (JSON/YAML) to make missing-field checks strict when fields are known"
+        help="Optional dataset schema file (JSON/YAML) to make missing-field checks strict when fields are known",
     )
     parser.add_argument(
         "--schema-missing",
         choices=["error", "warning"],
         default="error",
-        help="When --schema is provided and fields are known, treat missing fields as error or warning (default: error)"
+        help="When --schema is provided and fields are known, treat missing fields as error or warning (default: error)",
     )
     parser.add_argument(
         "--advice",
@@ -139,16 +164,15 @@ Examples:
             "limits,optimization,style,semantic,schema,diagnostic,other"
         ),
     )
-    parser.add_argument(
-        "query",
-        nargs="?",
-        default=None,
-        help="SPL query as a positional argument (alternative to --spl)",
-    )
 
     args = parser.parse_args()
 
-    # Validate --advice early so typos produce an argparse-style error message.
+    if args.preset == "strict":
+        args.strict = True
+    elif args.preset == "security_content":
+        args.strict = True
+        args.advice = "all"
+
     try:
         parse_warning_groups(args.advice)
     except ValueError as e:
@@ -167,13 +191,27 @@ Examples:
             print(f"Error loading registry pack {pack_path!r}: {e}", file=sys.stderr)
             sys.exit(1)
 
-    # Get SPL: --spl > --file > positional > stdin (non-TTY)
+    stdin_requested = bool(args.stdin) or (args.file == "-")
+    file_path_requested = bool(args.file) and args.file != "-"
+    sources = (
+        (1 if args.spl_positional is not None else 0)
+        + (1 if args.spl else 0)
+        + (1 if file_path_requested else 0)
+        + (1 if stdin_requested else 0)
+    )
+    if sources > 1:
+        parser.error("Use only one of: SPL positional argument, --spl, --file, or --stdin")
+
     spl: Optional[str] = None
-    if args.spl is not None:
+    if args.spl_positional is not None:
+        spl = args.spl_positional
+    elif args.spl:
         spl = args.spl
+    elif stdin_requested:
+        spl = sys.stdin.read()
     elif args.file:
         try:
-            with open(args.file, "r", encoding="utf-8") as f:
+            with open(args.file, "r", encoding="utf-8", errors="replace") as f:
                 spl = f.read()
         except FileNotFoundError:
             print(f"Error: File not found: {args.file}", file=sys.stderr)
@@ -181,25 +219,23 @@ Examples:
         except OSError as e:
             print(f"Error reading file: {e}", file=sys.stderr)
             sys.exit(1)
-    elif args.query is not None:
-        spl = args.query
     elif not sys.stdin.isatty():
         spl = sys.stdin.read()
     else:
         parser.print_help()
         print(
-            "\nProvide SPL via --spl, --file, a positional query, or pipe/heredoc on stdin.",
+            "\nProvide SPL via --spl, --file, a positional SPL argument, --stdin, or pipe/heredoc on stdin.",
             file=sys.stderr,
         )
         sys.exit(1)
-    
+
     schema_fields = None
     if args.schema:
         from .src.debug.schema import load_field_schema
+
         schema = load_field_schema(args.schema)
         schema_fields = set(schema.fields)
 
-    # Validate
     result = validate(
         spl,
         strict=args.strict,
@@ -210,12 +246,14 @@ Examples:
     debug_ast = None
     if args.dump_ast:
         from .src.debug.ast_dump import dump_ast
+
         debug_ast = dump_ast(result.ast, mode=args.ast_mode)
 
     debug_flow = None
     debug_flow_rendered = None
     if args.dump_flow and result.ast is not None:
-        from .src.debug.flow import build_flow, flow_to_text, flow_to_dot
+        from .src.debug.flow import build_flow, flow_to_dot, flow_to_text
+
         debug_flow = build_flow(result.ast, schema_fields=schema_fields)
         if args.flow_format == "text":
             debug_flow_rendered = flow_to_text(debug_flow)
@@ -223,8 +261,7 @@ Examples:
             debug_flow_rendered = flow_to_dot(debug_flow)
         else:
             debug_flow_rendered = None
-    
-    # Output
+
     if args.format == "json":
         output_json(
             result,
@@ -246,8 +283,7 @@ Examples:
             debug_flow_rendered=debug_flow_rendered,
             ast_mode=args.ast_mode,
         )
-    
-    # Exit code
+
     sys.exit(0 if result.is_valid else 1)
 
 
@@ -263,13 +299,11 @@ def output_text(
     ast_mode: str = "summary",
 ):
     """Output validation result as text."""
-    # Header
     if result.is_valid:
         print("✅ VALID SPL\n")
     else:
         print("❌ INVALID SPL\n")
-    
-    # Errors
+
     if result.errors:
         print("Errors:")
         for err in result.errors:
@@ -279,16 +313,16 @@ def output_text(
             if err.suggestion:
                 print(f"    💡 {err.suggestion}")
         print()
-    
+
     enabled = parse_warning_groups(warning_groups)
     grouped = group_warnings(result.warnings, enabled_groups=enabled)
-    
+
     if grouped.limits:
         print("📋 Limitations (from limits.conf):")
         for warn in grouped.limits:
             print(f"  • {warn.message}")
         print()
-    
+
     if grouped.optimization:
         print("⚡ Optimization Suggestions:")
         for warn in grouped.optimization:
@@ -311,18 +345,16 @@ def output_text(
             if warn.suggestion:
                 print(f"    💡 {warn.suggestion}")
         print()
-    
-    # Verbose: show AST summary
+
     if verbose and result.ast:
         print(f"📊 Pipeline: {len(result.ast.commands)} commands")
         for i, cmd in enumerate(result.ast.commands):
-            print(f"  {i+1}. {cmd.name}")
+            print(f"  {i + 1}. {cmd.name}")
 
     if debug_ast is not None and result.ast is not None:
         print()
         print(f"🌳 AST ({ast_mode}):")
         if ast_mode == "summary":
-            # Render a human-friendly view in summary mode.
             cmds = debug_ast.get("commands") if isinstance(debug_ast, dict) else None
             if isinstance(cmds, list):
                 for i, c in enumerate(cmds):
@@ -332,7 +364,7 @@ def output_text(
                     args_count = c.get("args_count", 0)
                     has_sub = c.get("has_subsearch", False)
                     print(
-                        f"  {i+1}. {name} options={options} clauses={clauses} args={args_count} subsearch={has_sub}"
+                        f"  {i + 1}. {name} options={options} clauses={clauses} args={args_count} subsearch={has_sub}"
                     )
             else:
                 print(json.dumps(debug_ast, indent=2))
@@ -365,7 +397,7 @@ def output_json(
     ast_mode: str = "summary",
 ):
     """Output validation result as JSON."""
-    output = build_cli_json_dict(
+    output = build_validation_json_dict(
         result,
         warning_groups=warning_groups,
         debug_ast=debug_ast,

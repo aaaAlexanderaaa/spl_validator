@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "SPL Validator (local API)",
+  "version": "0.1.0",
+  "description": "Validate Splunk SPL via a local spl-validator HTTP server (development tool).",
+  "action": {
+    "default_title": "SPL Validator",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage"],
+  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*"]
+}

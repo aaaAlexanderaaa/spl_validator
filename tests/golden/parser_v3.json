@@ -1,4 +1,5 @@
 {
+    "golden_format_version": 1,
     "tests": [
         {
             "name": "v3_valid_real_world_eval_dots",

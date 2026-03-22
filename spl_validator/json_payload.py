@@ -1,12 +1,22 @@
 """Build JSON-serializable dicts for CLI and HTTP API consumers."""
+
 from __future__ import annotations
 
+import importlib.metadata
 from typing import Any, Optional
 
+from .contract import OUTPUT_JSON_SCHEMA_VERSION
 from .src.models.warning_groups import group_warnings, parse_warning_groups
 
 
-def build_cli_json_dict(
+def package_version() -> str:
+    try:
+        return importlib.metadata.version("spl-validator")
+    except importlib.metadata.PackageNotFoundError:
+        return "0.0.0"
+
+
+def build_validation_json_dict(
     result,
     *,
     warning_groups: str = "optimization",
@@ -29,6 +39,8 @@ def build_cli_json_dict(
         + grouped.other
     )
     output: dict[str, Any] = {
+        "output_schema_version": OUTPUT_JSON_SCHEMA_VERSION,
+        "package_version": package_version(),
         "valid": result.is_valid,
         "errors": [
             {
@@ -66,4 +78,7 @@ def build_cli_json_dict(
     return output
 
 
-__all__ = ["build_cli_json_dict"]
+# Back-compat for prod integrations and docs that reference the older name.
+build_cli_json_dict = build_validation_json_dict
+
+__all__ = ["build_cli_json_dict", "build_validation_json_dict", "package_version"]

@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "SPL Validator",
+  "version": "0.1.0",
+  "description": "Validate Splunk SPL in the browser (TypeScript core, no local server).",
+  "action": {
+    "default_title": "SPL Validator",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": []
+}

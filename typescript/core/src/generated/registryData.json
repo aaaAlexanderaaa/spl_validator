@@ -1,0 +1,3034 @@
+{
+  "commandAliases": {
+    "bucket": "bin",
+    "discretize": "bin",
+    "kv": "extract",
+    "transam": "transaction"
+  },
+  "commands": {
+    "abstract": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "abstract",
+      "optional_args": {
+        "maxlines": "int",
+        "maxterms": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "accum": {
+      "clauses": [
+        "AS"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "accum",
+      "optional_args": {},
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "addcoltotals": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "addcoltotals",
+      "optional_args": {
+        "label": "str",
+        "labelfield": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "addinfo": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "addinfo",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "addtotals": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "addtotals",
+      "optional_args": {
+        "col": "bool",
+        "fieldname": "str",
+        "label": "str",
+        "labelfield": "str",
+        "row": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "anomalies": {
+      "clauses": [
+        "BY"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "anomalies",
+      "optional_args": {
+        "action": "str",
+        "denylist": "str",
+        "denylistthreshold": "float",
+        "field": "str",
+        "labelonly": "bool",
+        "maxvalues": "int",
+        "normalize": "bool",
+        "threshold": "float"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "anomalousvalue": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "anomalousvalue",
+      "optional_args": {
+        "action": "str",
+        "maxanofreq": "float",
+        "minsupcount": "int",
+        "minsupfreq": "float",
+        "pthresh": "float"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "anomalydetection": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "anomalydetection",
+      "optional_args": {
+        "action": "str",
+        "cutoff": "float",
+        "field": "str",
+        "method": "str",
+        "pthresh": "float"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "append": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": "append",
+      "name": "append",
+      "optional_args": {
+        "extendtimerange": "bool",
+        "maxout": "int",
+        "maxtime": "int",
+        "timeout": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "dataset"
+    },
+    "appendcols": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": "subsearch",
+      "name": "appendcols",
+      "optional_args": {
+        "override": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "dataset"
+    },
+    "appendpipe": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "appendpipe",
+      "optional_args": {
+        "run_in_preview": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "dataset"
+    },
+    "apply": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "apply",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "autoregress": {
+      "clauses": [
+        "AS"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "autoregress",
+      "optional_args": {
+        "p": "str"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "bin": {
+      "clauses": [
+        "AS"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "bin",
+      "optional_args": {
+        "aligntime": "str",
+        "bins": "int",
+        "end": "int",
+        "maxbins": "int",
+        "minspan": "str",
+        "span": "str",
+        "start": "int"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "chart": {
+      "clauses": [
+        "OVER",
+        "BY",
+        "dedup_splitvals"
+      ],
+      "filters_events": false,
+      "limit_key": "stats_memory",
+      "name": "chart",
+      "optional_args": {
+        "agg": "str",
+        "cont": "bool",
+        "format": "str",
+        "limit": "int",
+        "nullstr": "str",
+        "otherstr": "str",
+        "sep": "str",
+        "usenull": "bool",
+        "useother": "bool"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": "by_clause_excludes",
+      "type": "transforming"
+    },
+    "cluster": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "cluster",
+      "optional_args": {
+        "countfield": "str",
+        "delims": "str",
+        "field": "str",
+        "labelfield": "str",
+        "labelonly": "bool",
+        "match": "str",
+        "showcount": "bool",
+        "t": "float"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "collect": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "collect",
+      "optional_args": {
+        "host": "str",
+        "marker": "str",
+        "run_in_preview": "bool",
+        "source": "str",
+        "sourcetype": "str",
+        "testmode": "bool"
+      },
+      "required_args": [
+        "index"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "convert": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "convert",
+      "optional_args": {
+        "mktime": "bool",
+        "timeformat": "str"
+      },
+      "required_args": [
+        "conversion"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "cyberchef": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "cyberchef",
+      "optional_args": {
+        "infield": "str",
+        "jsonrecipe": "str",
+        "outfield": "str",
+        "recipe": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "datamodel": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "datamodel",
+      "optional_args": {
+        "allow_old_summaries": "bool",
+        "search": "str",
+        "strict_fields": "bool"
+      },
+      "required_args": [
+        "datamodel_name"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "dbinspect": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "dbinspect",
+      "optional_args": {
+        "span": "str",
+        "splunk_server": "str"
+      },
+      "required_args": [
+        "index"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "dedup": {
+      "clauses": [],
+      "filters_events": true,
+      "limit_key": null,
+      "name": "dedup",
+      "optional_args": {
+        "consecutive": "bool",
+        "keepempty": "bool",
+        "keepevents": "bool",
+        "sortby": "str"
+      },
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": "keeps_first",
+      "type": "streaming"
+    },
+    "deletemodel": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "deletemodel",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "delta": {
+      "clauses": [
+        "AS"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "delta",
+      "optional_args": {
+        "p": "int"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "erex": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "erex",
+      "optional_args": {
+        "counterexamples": "str",
+        "examples": "str",
+        "fromfield": "str",
+        "maxtrainers": "int"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "eval": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "eval",
+      "optional_args": {},
+      "required_args": [
+        "assignment"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "eventcount": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "eventcount",
+      "optional_args": {
+        "index": "str",
+        "list_vix": "bool",
+        "report_size": "bool",
+        "summarize": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "eventstats": {
+      "clauses": [
+        "BY"
+      ],
+      "filters_events": false,
+      "limit_key": "stats_memory",
+      "name": "eventstats",
+      "optional_args": {
+        "allnum": "bool"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": "by_clause_excludes",
+      "type": "streaming"
+    },
+    "experiment": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "experiment",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "extract": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "extract",
+      "optional_args": {
+        "auto": "bool",
+        "clean_keys": "bool",
+        "keep_empty_vals": "bool",
+        "kvdelim": "str",
+        "limit": "int",
+        "maxchars": "int",
+        "mv_add": "bool",
+        "pairdelim": "str",
+        "reload": "bool",
+        "segment": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "fieldformat": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "fieldformat",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "fields": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "fields",
+      "optional_args": {},
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "fieldsummary": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "fieldsummary",
+      "optional_args": {
+        "maxvals": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "filldown": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "filldown",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "fillnull": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "fillnull",
+      "optional_args": {
+        "value": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "fit": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "fit",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "foreach": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "foreach",
+      "optional_args": {
+        "fieldstr": "str",
+        "matchstr": "str",
+        "mode": "str"
+      },
+      "required_args": [
+        "field_pattern"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "format": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "format",
+      "optional_args": {
+        "emptystr": "str",
+        "maxresults": "int",
+        "mvsep": "str",
+        "quote": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "from": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "from",
+      "optional_args": {},
+      "required_args": [
+        "dataset"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "fromjson": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "fromjson",
+      "optional_args": {
+        "field": "str",
+        "max_depth": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "gauge": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "gauge",
+      "optional_args": {},
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "gentimes": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "gentimes",
+      "optional_args": {
+        "end": "str",
+        "increment": "str"
+      },
+      "required_args": [
+        "start"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "geom": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "geom",
+      "optional_args": {
+        "featureIdField": "str",
+        "gen": "float",
+        "max_x": "float",
+        "max_y": "float",
+        "min_x": "float",
+        "min_y": "float"
+      },
+      "required_args": [
+        "featureCollection"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "geomfilter": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "geomfilter",
+      "optional_args": {
+        "max_x": "float",
+        "max_y": "float",
+        "min_x": "float",
+        "min_y": "float"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "geostats": {
+      "clauses": [
+        "BY"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "geostats",
+      "optional_args": {
+        "binspanlat": "float",
+        "binspanlong": "float",
+        "globallimit": "int",
+        "latfield": "str",
+        "locallimit": "int",
+        "longfield": "str",
+        "maxzoomlevel": "int",
+        "outputlatfield": "str",
+        "outputlongfield": "str",
+        "translatetoxy": "bool"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "head": {
+      "clauses": [],
+      "filters_events": true,
+      "limit_key": "head",
+      "name": "head",
+      "optional_args": {
+        "keeplast": "bool",
+        "limit": "int",
+        "null": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming_centralized"
+    },
+    "highlight": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "highlight",
+      "optional_args": {},
+      "required_args": [
+        "terms"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "iconify": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "iconify",
+      "optional_args": {},
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "inputcsv": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "inputcsv",
+      "optional_args": {
+        "append": "bool",
+        "events": "bool",
+        "max": "int",
+        "start": "int"
+      },
+      "required_args": [
+        "filename"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "inputlookup": {
+      "clauses": [
+        "WHERE"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "inputlookup",
+      "optional_args": {
+        "append": "bool",
+        "max": "int",
+        "start": "int",
+        "strict": "bool"
+      },
+      "required_args": [
+        "filename"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "iplocation": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "iplocation",
+      "optional_args": {
+        "allfields": "bool",
+        "lang": "str",
+        "prefix": "str"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "join": {
+      "clauses": [
+        "WHERE"
+      ],
+      "filters_events": true,
+      "limit_key": "join_subsearch",
+      "name": "join",
+      "optional_args": {
+        "earlier": "bool",
+        "left": "str",
+        "max": "int",
+        "overwrite": "bool",
+        "return_multivalue": "bool",
+        "right": "str",
+        "type": "str",
+        "usetime": "bool"
+      },
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": "join_excludes",
+      "type": "dataset"
+    },
+    "kmeans": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "kmeans",
+      "optional_args": {
+        "cfield": "str",
+        "dt": "str",
+        "k": "int",
+        "maxiters": "int",
+        "reps": "int",
+        "showcentroid": "bool",
+        "t": "float"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "listmodels": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "listmodels",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "loadjob": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "loadjob",
+      "optional_args": {
+        "artifact_offset": "int",
+        "events": "bool",
+        "ignore_running": "bool",
+        "job_delegate": "str"
+      },
+      "required_args": [
+        "job_id"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "lookup": {
+      "clauses": [
+        "OUTPUT",
+        "OUTPUTNEW"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "lookup",
+      "optional_args": {
+        "event_time_field": "str",
+        "local": "bool",
+        "update": "bool"
+      },
+      "required_args": [
+        "lookup_name",
+        "field"
+      ],
+      "semantic_key": "lookup_input_required",
+      "type": "streaming"
+    },
+    "macro": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "macro",
+      "optional_args": {},
+      "required_args": [
+        "macro"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "makecontinuous": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "makecontinuous",
+      "optional_args": {
+        "bins": "int",
+        "end": "int",
+        "span": "str",
+        "start": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "makemv": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "makemv",
+      "optional_args": {
+        "allowempty": "bool",
+        "delim": "str",
+        "setsv": "bool",
+        "tokenizer": "str"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "makeresults": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "makeresults",
+      "optional_args": {
+        "annotate": "bool",
+        "count": "int",
+        "splunk_server": "str",
+        "splunk_server_group": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "map": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "map",
+      "optional_args": {
+        "maxsearches": "int"
+      },
+      "required_args": [
+        "search"
+      ],
+      "semantic_key": "map_expensive",
+      "type": "streaming"
+    },
+    "mcatalog": {
+      "clauses": [
+        "WHERE"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "mcatalog",
+      "optional_args": {
+        "local": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "mcollect": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "mcollect",
+      "optional_args": {
+        "host": "str",
+        "index": "str",
+        "marker": "str",
+        "source": "str",
+        "sourcetype": "str",
+        "split": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "metadata": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "metadata",
+      "optional_args": {
+        "index": "str",
+        "splunk_server": "str",
+        "splunk_server_group": "str"
+      },
+      "required_args": [
+        "type"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "mpreview": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "mpreview",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "mstats": {
+      "clauses": [
+        "WHERE",
+        "BY",
+        "GROUPBY",
+        "FROM"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "mstats",
+      "optional_args": {
+        "align_timestamp": "str",
+        "append": "bool",
+        "chunk_size": "int",
+        "indexes": "str",
+        "local": "bool",
+        "prestats": "bool",
+        "span": "str"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "multikv": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "multikv",
+      "optional_args": {
+        "conf": "str",
+        "copyattrs": "bool",
+        "fields": "str",
+        "filter": "str",
+        "forceheader": "int",
+        "header": "str",
+        "multitable": "bool",
+        "noheader": "bool",
+        "rmorig": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "multisearch": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "multisearch",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "mvcombine": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "mvcombine",
+      "optional_args": {
+        "delim": "str"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "mvexpand": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": "mvexpand",
+      "name": "mvexpand",
+      "optional_args": {
+        "limit": "int"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "outlier": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "outlier",
+      "optional_args": {
+        "action": "str",
+        "field": "str",
+        "mark": "bool",
+        "param": "float",
+        "uselower": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "outputcsv": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "outputcsv",
+      "optional_args": {
+        "append": "bool",
+        "create_empty": "bool",
+        "override_if_empty": "bool",
+        "singlefile": "bool"
+      },
+      "required_args": [
+        "filename"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "outputlookup": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "outputlookup",
+      "optional_args": {
+        "append": "bool",
+        "create_empty": "bool",
+        "createinapp": "bool",
+        "key_field": "str",
+        "max": "int",
+        "override_if_empty": "bool"
+      },
+      "required_args": [
+        "filename"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "pivot": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "pivot",
+      "optional_args": {},
+      "required_args": [
+        "datamodel",
+        "object"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "predict": {
+      "clauses": [
+        "AS"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "predict",
+      "optional_args": {
+        "algorithm": "str",
+        "correlate": "str",
+        "future_timespan": "int",
+        "holdback": "int",
+        "lower": "int",
+        "period": "int",
+        "suppress": "str",
+        "upper": "int"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "rangemap": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "rangemap",
+      "optional_args": {
+        "default": "str"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "rare": {
+      "clauses": [
+        "BY"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "rare",
+      "optional_args": {
+        "countfield": "str",
+        "limit": "int",
+        "percentfield": "str",
+        "showcount": "bool",
+        "showperc": "bool"
+      },
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": "top_rare_excludes",
+      "type": "transforming"
+    },
+    "regex": {
+      "clauses": [],
+      "filters_events": true,
+      "limit_key": null,
+      "name": "regex",
+      "optional_args": {
+        "field": "str"
+      },
+      "required_args": [
+        "regex"
+      ],
+      "semantic_key": "regex_filters",
+      "type": "streaming"
+    },
+    "reltime": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "reltime",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "rename": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "rename",
+      "optional_args": {},
+      "required_args": [
+        "rename_pairs"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "replace": {
+      "clauses": [
+        "IN"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "replace",
+      "optional_args": {},
+      "required_args": [
+        "wc_string",
+        "with_string"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "rest": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "rest",
+      "optional_args": {
+        "count": "int",
+        "splunk_server": "str",
+        "timeout": "int"
+      },
+      "required_args": [
+        "uri"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "return": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "return",
+      "optional_args": {
+        "count": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "reverse": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "reverse",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "rex": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "rex",
+      "optional_args": {
+        "field": "str",
+        "max_match": "int",
+        "mode": "str",
+        "offset_field": "str"
+      },
+      "required_args": [
+        "regex"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "sample": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "sample",
+      "optional_args": {
+        "count": "int",
+        "prob": "float",
+        "seed": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "search": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "search",
+      "optional_args": {
+        "earliest": "str",
+        "host": "str",
+        "index": "str",
+        "latest": "str",
+        "source": "str",
+        "sourcetype": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "selfjoin": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "selfjoin",
+      "optional_args": {
+        "keepsingle": "bool",
+        "max": "int",
+        "overwrite": "bool"
+      },
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": null,
+      "type": "dataset"
+    },
+    "sendemail": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "sendemail",
+      "optional_args": {
+        "bcc": "str",
+        "cc": "str",
+        "format": "str",
+        "from": "str",
+        "inline": "bool",
+        "message": "str",
+        "sendcsv": "bool",
+        "sendpdf": "bool",
+        "sendresults": "bool",
+        "server": "str",
+        "subject": "str"
+      },
+      "required_args": [
+        "to"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "set": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "set",
+      "optional_args": {},
+      "required_args": [
+        "operation"
+      ],
+      "semantic_key": null,
+      "type": "dataset"
+    },
+    "sort": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": "sort",
+      "name": "sort",
+      "optional_args": {
+        "auto": "str",
+        "d": "bool",
+        "ip": "str",
+        "limit": "int",
+        "num": "str",
+        "str": "str"
+      },
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "spath": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "spath",
+      "optional_args": {
+        "input": "str",
+        "output": "str",
+        "path": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "stats": {
+      "clauses": [
+        "BY",
+        "dedup_splitvals"
+      ],
+      "filters_events": false,
+      "limit_key": "stats_memory",
+      "name": "stats",
+      "optional_args": {
+        "allnum": "bool",
+        "delim": "str",
+        "partitions": "int"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": "by_clause_excludes",
+      "type": "transforming"
+    },
+    "strcat": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "strcat",
+      "optional_args": {
+        "allrequired": "bool"
+      },
+      "required_args": [
+        "field_list",
+        "dest_field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "streamstats": {
+      "clauses": [
+        "BY"
+      ],
+      "filters_events": false,
+      "limit_key": "stats_memory",
+      "name": "streamstats",
+      "optional_args": {
+        "allnum": "bool",
+        "current": "bool",
+        "global": "bool",
+        "reset_after": "str",
+        "reset_before": "str",
+        "reset_on_change": "bool",
+        "time_window": "str",
+        "window": "int"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": "by_clause_excludes",
+      "type": "streaming_centralized"
+    },
+    "summary": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "summary",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "table": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "table",
+      "optional_args": {},
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "tail": {
+      "clauses": [],
+      "filters_events": true,
+      "limit_key": "tail",
+      "name": "tail",
+      "optional_args": {
+        "limit": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming_centralized"
+    },
+    "timechart": {
+      "clauses": [
+        "BY",
+        "dedup_splitvals"
+      ],
+      "filters_events": false,
+      "limit_key": "stats_memory",
+      "name": "timechart",
+      "optional_args": {
+        "agg": "str",
+        "bins": "int",
+        "cont": "bool",
+        "fixedrange": "bool",
+        "format": "str",
+        "limit": "int",
+        "nullstr": "str",
+        "otherstr": "str",
+        "partial": "bool",
+        "sep": "str",
+        "span": "str",
+        "usenull": "bool",
+        "useother": "bool"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": "by_clause_excludes",
+      "type": "transforming"
+    },
+    "tojson": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "tojson",
+      "optional_args": {
+        "include_nulls": "bool",
+        "output_field": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "top": {
+      "clauses": [
+        "BY"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "top",
+      "optional_args": {
+        "countfield": "str",
+        "limit": "int",
+        "otherstr": "str",
+        "percentfield": "str",
+        "showcount": "bool",
+        "showperc": "bool",
+        "useother": "bool"
+      },
+      "required_args": [
+        "field_list"
+      ],
+      "semantic_key": "top_rare_excludes",
+      "type": "transforming"
+    },
+    "transaction": {
+      "clauses": [
+        "startswith",
+        "endswith"
+      ],
+      "filters_events": true,
+      "limit_key": "transaction",
+      "name": "transaction",
+      "optional_args": {
+        "connected": "bool",
+        "delim": "str",
+        "keeporphans": "bool",
+        "maxevents": "int",
+        "maxopenevents": "int",
+        "maxopentxn": "int",
+        "maxpause": "str",
+        "maxspan": "str",
+        "mvlist": "bool",
+        "name": "str",
+        "unifyends": "bool"
+      },
+      "required_args": [],
+      "semantic_key": "transaction_orphans",
+      "type": "transforming"
+    },
+    "transpose": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "transpose",
+      "optional_args": {
+        "column_name": "str",
+        "header_field": "str",
+        "include_empty": "bool"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "trendline": {
+      "clauses": [
+        "AS"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "trendline",
+      "optional_args": {},
+      "required_args": [
+        "trendtype",
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "tstats": {
+      "clauses": [
+        "FROM",
+        "WHERE",
+        "BY",
+        "GROUPBY"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "tstats",
+      "optional_args": {
+        "allow_old_summaries": "bool",
+        "append": "bool",
+        "chunk_size": "int",
+        "include_reduced_buckets": "bool",
+        "local": "bool",
+        "prestats": "bool",
+        "span": "str",
+        "summariesonly": "bool"
+      },
+      "required_args": [
+        "aggregation"
+      ],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "union": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "union",
+      "optional_args": {
+        "maxout": "int",
+        "maxtime": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "uniq": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "uniq",
+      "optional_args": {},
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "untable": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "untable",
+      "optional_args": {},
+      "required_args": [
+        "key_field",
+        "attribute_field",
+        "value_field"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "walklex": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "walklex",
+      "optional_args": {
+        "index": "str",
+        "type": "str"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "generating"
+    },
+    "where": {
+      "clauses": [],
+      "filters_events": true,
+      "limit_key": null,
+      "name": "where",
+      "optional_args": {},
+      "required_args": [
+        "expression"
+      ],
+      "semantic_key": "filters_events",
+      "type": "streaming"
+    },
+    "x11": {
+      "clauses": [
+        "AS"
+      ],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "x11",
+      "optional_args": {
+        "mult": "bool",
+        "period": "int"
+      },
+      "required_args": [
+        "field"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    },
+    "xmlkv": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "xmlkv",
+      "optional_args": {
+        "maxinputs": "int"
+      },
+      "required_args": [],
+      "semantic_key": null,
+      "type": "streaming"
+    },
+    "xyseries": {
+      "clauses": [],
+      "filters_events": false,
+      "limit_key": null,
+      "name": "xyseries",
+      "optional_args": {
+        "format": "str",
+        "grouped": "bool",
+        "sep": "str"
+      },
+      "required_args": [
+        "x_field",
+        "y_field",
+        "value_field"
+      ],
+      "semantic_key": null,
+      "type": "transforming"
+    }
+  },
+  "evalExpressionCommands": [
+    "eval",
+    "fieldformat",
+    "where"
+  ],
+  "functions": {
+    "abs": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "abs",
+      "syntax": "abs(<num>)"
+    },
+    "acos": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "acos",
+      "syntax": "acos(<num>)"
+    },
+    "acosh": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "acosh",
+      "syntax": "acosh(<num>)"
+    },
+    "asin": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "asin",
+      "syntax": "asin(<num>)"
+    },
+    "asinh": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "asinh",
+      "syntax": "asinh(<num>)"
+    },
+    "atan": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "atan",
+      "syntax": "atan(<num>)"
+    },
+    "atan2": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "atan2",
+      "syntax": "atan2(<num>,<num>)"
+    },
+    "atanh": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "atanh",
+      "syntax": "atanh(<num>)"
+    },
+    "avg": {
+      "category": "evaluation_and_statistical",
+      "context": "both",
+      "max_args": null,
+      "min_args": 1,
+      "name": "avg",
+      "syntax": "avg(<field>|eval(<expr>),...)"
+    },
+    "bit_and": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 2,
+      "name": "bit_and",
+      "syntax": "bit_and(<num>,<num>,...)"
+    },
+    "bit_not": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "bit_not",
+      "syntax": "bit_not(<num>,<bitwidth>)"
+    },
+    "bit_or": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 2,
+      "name": "bit_or",
+      "syntax": "bit_or(<num>,<num>,...)"
+    },
+    "bit_shift_left": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "bit_shift_left",
+      "syntax": "bit_shift_left(<num>,<bits>)"
+    },
+    "bit_shift_right": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "bit_shift_right",
+      "syntax": "bit_shift_right(<num>,<bits>)"
+    },
+    "bit_xor": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 2,
+      "name": "bit_xor",
+      "syntax": "bit_xor(<num>,<num>,...)"
+    },
+    "case": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 2,
+      "name": "case",
+      "syntax": "case(<cond>,<val>,...,<default>)"
+    },
+    "ceil": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "ceil",
+      "syntax": "ceil(<num>)"
+    },
+    "ceiling": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "ceiling",
+      "syntax": "ceiling(<num>)"
+    },
+    "cidrmatch": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "cidrmatch",
+      "syntax": "cidrmatch(<cidr>,<ip>)"
+    },
+    "coalesce": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 1,
+      "name": "coalesce",
+      "syntax": "coalesce(<field>,...)"
+    },
+    "commands": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "commands",
+      "syntax": "commands(<str>)"
+    },
+    "cos": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "cos",
+      "syntax": "cos(<num>)"
+    },
+    "cosh": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "cosh",
+      "syntax": "cosh(<num>)"
+    },
+    "count": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 0,
+      "name": "count",
+      "syntax": "count(<field>)"
+    },
+    "dc": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "dc",
+      "syntax": "dc(<field>)"
+    },
+    "distinct_count": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "distinct_count",
+      "syntax": "distinct_count(<field>)"
+    },
+    "earliest": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "earliest",
+      "syntax": "earliest(<field>)"
+    },
+    "earliest_time": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "earliest_time",
+      "syntax": "earliest_time(<field>)"
+    },
+    "estdc": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "estdc",
+      "syntax": "estdc(<field>)"
+    },
+    "estdc_error": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "estdc_error",
+      "syntax": "estdc_error(<field>)"
+    },
+    "exact": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "exact",
+      "syntax": "exact(<expr>)"
+    },
+    "exp": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "exp",
+      "syntax": "exp(<num>)"
+    },
+    "false": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 0,
+      "min_args": 0,
+      "name": "false",
+      "syntax": "false()"
+    },
+    "first": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "first",
+      "syntax": "first(<field>)"
+    },
+    "floor": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "floor",
+      "syntax": "floor(<num>)"
+    },
+    "hypot": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "hypot",
+      "syntax": "hypot(<num>,<num>)"
+    },
+    "if": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 3,
+      "name": "if",
+      "syntax": "if(<predicate>,<then>,<else>)"
+    },
+    "ifnull": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 1,
+      "name": "ifnull",
+      "syntax": "ifnull(<field>,...)"
+    },
+    "in": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 2,
+      "name": "in",
+      "syntax": "in(<field>,<val>,...)"
+    },
+    "ipmask": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "ipmask",
+      "syntax": "ipmask(<ip>,<mask>)"
+    },
+    "isarray": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isarray",
+      "syntax": "isarray(<field>)"
+    },
+    "isbool": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isbool",
+      "syntax": "isbool(<field>)"
+    },
+    "isdouble": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isdouble",
+      "syntax": "isdouble(<field>)"
+    },
+    "isint": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isint",
+      "syntax": "isint(<field>)"
+    },
+    "ismv": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "ismv",
+      "syntax": "ismv(<field>)"
+    },
+    "isnotnull": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isnotnull",
+      "syntax": "isnotnull(<field>)"
+    },
+    "isnull": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isnull",
+      "syntax": "isnull(<field>)"
+    },
+    "isnum": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isnum",
+      "syntax": "isnum(<field>)"
+    },
+    "isobject": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isobject",
+      "syntax": "isobject(<field>)"
+    },
+    "isstr": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "isstr",
+      "syntax": "isstr(<field>)"
+    },
+    "json": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "json",
+      "syntax": "json(<str>)"
+    },
+    "json_append": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 3,
+      "name": "json_append",
+      "syntax": "json_append(<json>,<path>,<val>)"
+    },
+    "json_array": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 0,
+      "name": "json_array",
+      "syntax": "json_array(<val>,...)"
+    },
+    "json_array_to_mv": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "json_array_to_mv",
+      "syntax": "json_array_to_mv(<json-array>)"
+    },
+    "json_delete": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "json_delete",
+      "syntax": "json_delete(<json>,<path>)"
+    },
+    "json_entries": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "json_entries",
+      "syntax": "json_entries(<json>)"
+    },
+    "json_extend": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 3,
+      "name": "json_extend",
+      "syntax": "json_extend(<json>,<path>,<val>)"
+    },
+    "json_extract": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 2,
+      "name": "json_extract",
+      "syntax": "json_extract(<json>,<path>,...)"
+    },
+    "json_extract_exact": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "json_extract_exact",
+      "syntax": "json_extract_exact(<json>,<path>)"
+    },
+    "json_has_key": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "json_has_key",
+      "syntax": "json_has_key(<json>,<path>)"
+    },
+    "json_has_key_exact": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "json_has_key_exact",
+      "syntax": "json_has_key_exact(<json>,<path>)"
+    },
+    "json_keys": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "json_keys",
+      "syntax": "json_keys(<json>)"
+    },
+    "json_object": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 0,
+      "name": "json_object",
+      "syntax": "json_object(<key>,<val>,...)"
+    },
+    "json_set": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 3,
+      "name": "json_set",
+      "syntax": "json_set(<json>,<path>,<val>)"
+    },
+    "json_set_exact": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 3,
+      "name": "json_set_exact",
+      "syntax": "json_set_exact(<json>,<path>,<val>)"
+    },
+    "json_valid": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "json_valid",
+      "syntax": "json_valid(<json>)"
+    },
+    "last": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "last",
+      "syntax": "last(<field>)"
+    },
+    "latest": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "latest",
+      "syntax": "latest(<field>)"
+    },
+    "latest_time": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "latest_time",
+      "syntax": "latest_time(<field>)"
+    },
+    "len": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "len",
+      "syntax": "len(<str>)"
+    },
+    "like": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "like",
+      "syntax": "like(<str>,<pattern>)"
+    },
+    "list": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "list",
+      "syntax": "list(<field>)"
+    },
+    "ln": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "ln",
+      "syntax": "ln(<num>)"
+    },
+    "log": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "log",
+      "syntax": "log(<num>,<base>)"
+    },
+    "lookup": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 3,
+      "name": "lookup",
+      "syntax": "lookup(<table>,<lookup-field>,<event-field>)"
+    },
+    "lower": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "lower",
+      "syntax": "lower(<str>)"
+    },
+    "ltrim": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "ltrim",
+      "syntax": "ltrim(<str>,<chars>)"
+    },
+    "match": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "match",
+      "syntax": "match(<str>,<regex>)"
+    },
+    "max": {
+      "category": "evaluation_and_statistical",
+      "context": "both",
+      "max_args": null,
+      "min_args": 1,
+      "name": "max",
+      "syntax": "max(<field>|eval(<expr>),...)"
+    },
+    "md5": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "md5",
+      "syntax": "md5(<str>)"
+    },
+    "mean": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mean",
+      "syntax": "mean(<field>)"
+    },
+    "median": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "median",
+      "syntax": "median(<field>)"
+    },
+    "min": {
+      "category": "evaluation_and_statistical",
+      "context": "both",
+      "max_args": null,
+      "min_args": 1,
+      "name": "min",
+      "syntax": "min(<field>|eval(<expr>),...)"
+    },
+    "mode": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mode",
+      "syntax": "mode(<field>)"
+    },
+    "mv_to_json_array": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mv_to_json_array",
+      "syntax": "mv_to_json_array(<mv>)"
+    },
+    "mvappend": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 1,
+      "name": "mvappend",
+      "syntax": "mvappend(<field>,...)"
+    },
+    "mvcount": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mvcount",
+      "syntax": "mvcount(<mv>)"
+    },
+    "mvdedup": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mvdedup",
+      "syntax": "mvdedup(<mv>)"
+    },
+    "mvfilter": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mvfilter",
+      "syntax": "mvfilter(<predicate-expr>)"
+    },
+    "mvfind": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "mvfind",
+      "syntax": "mvfind(<mv>,<regex>)"
+    },
+    "mvindex": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 2,
+      "name": "mvindex",
+      "syntax": "mvindex(<mv>,<start>,<end>)"
+    },
+    "mvjoin": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "mvjoin",
+      "syntax": "mvjoin(<mv>,<delim>)"
+    },
+    "mvmap": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 2,
+      "name": "mvmap",
+      "syntax": "mvmap(<mv>,<expr>,<var>)"
+    },
+    "mvrange": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 2,
+      "name": "mvrange",
+      "syntax": "mvrange(<start>,<end>,<step>)"
+    },
+    "mvreverse": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mvreverse",
+      "syntax": "mvreverse(<mv>)"
+    },
+    "mvsort": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "mvsort",
+      "syntax": "mvsort(<mv>)"
+    },
+    "mvzip": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 2,
+      "name": "mvzip",
+      "syntax": "mvzip(<mv1>,<mv2>,<delim>)"
+    },
+    "now": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 0,
+      "min_args": 0,
+      "name": "now",
+      "syntax": "now()"
+    },
+    "null": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 0,
+      "min_args": 0,
+      "name": "null",
+      "syntax": "null()"
+    },
+    "nullif": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "nullif",
+      "syntax": "nullif(<field1>,<field2>)"
+    },
+    "pi": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 0,
+      "min_args": 0,
+      "name": "pi",
+      "syntax": "pi()"
+    },
+    "pow": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "pow",
+      "syntax": "pow(<num>,<num>)"
+    },
+    "printf": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 1,
+      "name": "printf",
+      "syntax": "printf(<format>,<values>,...)"
+    },
+    "random": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 0,
+      "min_args": 0,
+      "name": "random",
+      "syntax": "random()"
+    },
+    "range": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "range",
+      "syntax": "range(<field>)"
+    },
+    "rate": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "rate",
+      "syntax": "rate(<field>)"
+    },
+    "rate_avg": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "rate_avg",
+      "syntax": "rate_avg(<field>)"
+    },
+    "rate_sum": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "rate_sum",
+      "syntax": "rate_sum(<field>)"
+    },
+    "relative_time": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "relative_time",
+      "syntax": "relative_time(<time>,<relative-spec>)"
+    },
+    "replace": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 3,
+      "name": "replace",
+      "syntax": "replace(<str>,<pattern>,<replacement>)"
+    },
+    "round": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "round",
+      "syntax": "round(<num>,<precision>)"
+    },
+    "rtrim": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "rtrim",
+      "syntax": "rtrim(<str>,<chars>)"
+    },
+    "searchmatch": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "searchmatch",
+      "syntax": "searchmatch(<search-string>)"
+    },
+    "sha1": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sha1",
+      "syntax": "sha1(<str>)"
+    },
+    "sha256": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sha256",
+      "syntax": "sha256(<str>)"
+    },
+    "sha512": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sha512",
+      "syntax": "sha512(<str>)"
+    },
+    "sigfig": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sigfig",
+      "syntax": "sigfig(<num>)"
+    },
+    "sin": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sin",
+      "syntax": "sin(<num>)"
+    },
+    "sinh": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sinh",
+      "syntax": "sinh(<num>)"
+    },
+    "sparkline": {
+      "category": "statistical_charting",
+      "context": "stats",
+      "max_args": 2,
+      "min_args": 0,
+      "name": "sparkline",
+      "syntax": "sparkline | sparkline(<agg-expr>,<span>)"
+    },
+    "spath": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "spath",
+      "syntax": "spath(<field>,<path>)"
+    },
+    "split": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "split",
+      "syntax": "split(<str>,<delim>)"
+    },
+    "sqrt": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sqrt",
+      "syntax": "sqrt(<num>)"
+    },
+    "stdev": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "stdev",
+      "syntax": "stdev(<field>)"
+    },
+    "stdevp": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "stdevp",
+      "syntax": "stdevp(<field>)"
+    },
+    "strftime": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "strftime",
+      "syntax": "strftime(<time>,<format>)"
+    },
+    "strptime": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 2,
+      "name": "strptime",
+      "syntax": "strptime(<str>,<format>)"
+    },
+    "substr": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 3,
+      "min_args": 2,
+      "name": "substr",
+      "syntax": "substr(<str>,<start>,<length>)"
+    },
+    "sum": {
+      "category": "evaluation_and_statistical",
+      "context": "both",
+      "max_args": null,
+      "min_args": 1,
+      "name": "sum",
+      "syntax": "sum(<field>|eval(<expr>),...)"
+    },
+    "sumsq": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sumsq",
+      "syntax": "sumsq(<field>)"
+    },
+    "tan": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "tan",
+      "syntax": "tan(<num>)"
+    },
+    "tanh": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "tanh",
+      "syntax": "tanh(<num>)"
+    },
+    "time": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 0,
+      "min_args": 0,
+      "name": "time",
+      "syntax": "time()"
+    },
+    "toarray": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "toarray",
+      "syntax": "toarray(<field>)"
+    },
+    "tobool": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "tobool",
+      "syntax": "tobool(<field>)"
+    },
+    "todouble": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "todouble",
+      "syntax": "todouble(<field>,<base>)"
+    },
+    "toint": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "toint",
+      "syntax": "toint(<field>,<base>)"
+    },
+    "tomv": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "tomv",
+      "syntax": "tomv(<field>)"
+    },
+    "tonumber": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "tonumber",
+      "syntax": "tonumber(<str>,<base>)"
+    },
+    "toobject": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "toobject",
+      "syntax": "toobject(<field>)"
+    },
+    "tostring": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "tostring",
+      "syntax": "tostring(<field>,<format>)"
+    },
+    "trim": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 2,
+      "min_args": 1,
+      "name": "trim",
+      "syntax": "trim(<str>,<chars>)"
+    },
+    "true": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 0,
+      "min_args": 0,
+      "name": "true",
+      "syntax": "true()"
+    },
+    "typeof": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "typeof",
+      "syntax": "typeof(<field>)"
+    },
+    "upper": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "upper",
+      "syntax": "upper(<str>)"
+    },
+    "urldecode": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "urldecode",
+      "syntax": "urldecode(<str>)"
+    },
+    "validate": {
+      "category": "evaluation",
+      "context": "eval",
+      "max_args": null,
+      "min_args": 2,
+      "name": "validate",
+      "syntax": "validate(<condition>,<msg>,...)"
+    },
+    "values": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "values",
+      "syntax": "values(<field>)"
+    },
+    "var": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "var",
+      "syntax": "var(<field>)"
+    },
+    "varp": {
+      "category": "statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "varp",
+      "syntax": "varp(<field>)"
+    }
+  },
+  "generatingCommands": [
+    "datamodel",
+    "dbinspect",
+    "eventcount",
+    "from",
+    "gentimes",
+    "inputcsv",
+    "inputlookup",
+    "loadjob",
+    "macro",
+    "makeresults",
+    "mcatalog",
+    "metadata",
+    "mpreview",
+    "mstats",
+    "multisearch",
+    "rest",
+    "search",
+    "tstats",
+    "union",
+    "walklex"
+  ],
+  "statsAggregationCommands": [
+    "chart",
+    "eventstats",
+    "rare",
+    "stats",
+    "streamstats",
+    "timechart",
+    "top"
+  ],
+  "statsArityOverrides": {
+    "avg": {
+      "category": "evaluation_and_statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "avg",
+      "syntax": "avg(<field>|eval(<expr>))"
+    },
+    "max": {
+      "category": "evaluation_and_statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "max",
+      "syntax": "max(<field>|eval(<expr>))"
+    },
+    "min": {
+      "category": "evaluation_and_statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "min",
+      "syntax": "min(<field>|eval(<expr>))"
+    },
+    "sum": {
+      "category": "evaluation_and_statistical",
+      "context": "stats",
+      "max_args": 1,
+      "min_args": 1,
+      "name": "sum",
+      "syntax": "sum(<field>|eval(<expr>))"
+    }
+  }
+}

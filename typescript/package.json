@@ -1,0 +1,14 @@
+{
+  "name": "spl-validator-typescript",
+  "private": true,
+  "workspaces": [
+    "core",
+    "runtime",
+    "extension"
+  ],
+  "scripts": {
+    "build": "npm run build -w core && npm run build -w runtime && npm run build -w extension",
+    "test": "npm run test -w core",
+    "registry:export": "python3 scripts/export_registry.py"
+  }
+}

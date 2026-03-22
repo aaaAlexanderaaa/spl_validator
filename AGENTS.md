@@ -5,10 +5,21 @@
 ### Overview
 
 SPL Validator is a static analysis / linting tool for Splunk Processing Language (SPL) queries.
-It consists of two products: a **Python package** (CLI + HTTP API + optional TUI) and a **Chromium browser extension** that talks to the HTTP API.
+It ships a **Python package** (CLI + HTTP API + optional TUI), a **legacy Chromium extension** under `browser_extension/` that calls the HTTP API, and a **TypeScript implementation** under `typescript/` (core library, `spl-validator-ts` CLI, and a **standalone** MV3 extension that bundles the validator without a local server).
+
+### TypeScript as the main entry point
+
+The project is currently **focused on TypeScript** for day-to-day work and for **automated environment setup**. When provisioning or validating a workspace, prioritize the **`typescript/`** workspace: `npm install` there, build **`@spl-validator/core`**, and run its tests. **Only the TypeScript components need to succeed** for that setup path to be considered healthy.
+
+If that setup fails, treat it as a **TypeScript code, config, or dependency problem** to fix in-repo (unless you explicitly need a Python-only path and the failure is unrelated to `typescript/`).
+
+**Automatic or agent-driven bug fixes are allowed** while getting `npm install`, `npm run build`, and `npm test` (TypeScript packages) to pass.
+
+Python remains the **canonical registry**; after editing `spl_validator` command/function registries, run `python3 typescript/scripts/export_registry.py` to refresh generated data under `typescript/core/src/generated/`.
 
 ### Running services
 
+- **TypeScript (primary for setup):** from `typescript/`: `npm install`, then `npm run build -w @spl-validator/core`, `npm run test -w @spl-validator/core`, and optionally `npm run build -w @spl-validator/extension`. CLI: `node runtime/dist/cli.js` or the `spl-validator-ts` bin from `@spl-validator/runtime` after build.
 - **Python tests:** `pytest tests/` from the repo root (188 tests; 2 skipped by design).
 - **CLI:** `python3 -m spl_validator --spl="index=web | stats count BY host"` (or `--format=json`).
 - **HTTP API:** `python3 -m spl_validator.httpd --host 127.0.0.1 --port 8765` — serves `POST /validate` and `GET /health`.

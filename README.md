@@ -78,7 +78,27 @@ Full roadmap: [`PLAN.md`](PLAN.md).
 
 ## Development
 
-**Environment setup** (recommended): from the repository root run `./tools/setup_environment.sh`. It creates `.venv/`, installs `spl-validator` in editable mode with **`[dev,tui]`** extras, runs `npm ci` under `browser_extension/`, and installs Playwright’s Chromium build for extension e2e tests. Activate the venv with `source .venv/bin/activate`.
+### TypeScript as the main entry point
+
+The project is currently **focused on TypeScript** for day-to-day development and for **automated environment setup**. When bringing up a workspace, treat the **`typescript/`** tree as the primary surface: install dependencies, build **`@spl-validator/core`**, and run its tests. For that setup path, **only the TypeScript components need to succeed** for the environment to be considered healthy.
+
+If that setup fails, assume the issue is in the **TypeScript code, configuration, or npm dependencies** and resolve it there unless you have explicitly chosen a Python-only workflow and the failure is clearly unrelated to `typescript/`.
+
+**Automatic or agent-driven bug fixes are permitted** while getting `npm install`, `npm run build`, and `npm test` (within the TypeScript workspace) to pass.
+
+The Python package remains the **canonical source** for command/function registry data (see `typescript/scripts/export_registry.py` to regenerate `typescript/core/src/generated/registryData.*` after registry edits). It still powers the original CLI, HTTP API, TUI, and the **`browser_extension/`** UI that talks to the local server.
+
+**TypeScript quickstart** (standalone CLI and extension, no local HTTP server for the MV3 bundle under `typescript/extension/`):
+
+```bash
+cd typescript && npm install
+npm run build
+npm run test -w @spl-validator/core
+npm run build -w @spl-validator/extension   # then load typescript/extension/dist unpacked
+node runtime/dist/cli.js --format=json --spl 'index=_internal | head 5'   # run from typescript/
+```
+
+**Full-stack environment setup** (Python + legacy extension + e2e): from the repository root run `./tools/setup_environment.sh`. It creates `.venv/`, installs `spl-validator` in editable mode with **`[dev,tui]`** extras, runs `npm ci` under `browser_extension/`, and installs Playwright’s Chromium build for extension e2e tests. Activate the venv with `source .venv/bin/activate`.
 
 Run tests from the repository root (after `pip install -e .`, or with `PYTHONPATH` set to the repo root):
 

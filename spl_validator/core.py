@@ -1,12 +1,24 @@
 """Core orchestrator - main validation pipeline."""
+import re
 from typing import Optional, Any
 from .src.lexer import Lexer, Token, TokenType, Position, KEYWORDS
-from .src.parser.ast import Pipeline, Command, Clause, Subsearch
+from .src.parser.ast import (
+    Pipeline, Command, Clause, Subsearch, Argument, Assignment,
+    FunctionCall, BinaryOp, UnaryOp,
+)
 from .src.parser.parser import CommandParser, ExpressionParser, ParseError
 from .src.models import ValidationResult, Severity
 from .src.registry import is_generating_command, is_known_command, get_command, get_function
+from .src.registry.functions import (
+    is_known_function,
+    validate_function_arity,
+    validate_function_context,
+)
 from .src.analyzer import validate_sequence, get_limit
 from .src.analyzer.suggestions import check_suggestions
+from .src.analyzer.subsearch import validate_all_subsearches
+from .src.analyzer.fields import track_fields
+from .src.analyzer.limits import get_semantic_warning
 
 
 # Keyword tokens that can also be command names
@@ -202,7 +214,7 @@ def validate(
             suggestion="Expand or remove map search strings if you need them validated as SPL.",
         )
 
-    setattr(result, "_lex_spl", spl_for_lexing)
+    result._lex_spl = spl_for_lexing
 
     # Phase 1: Lexical analysis
     lexer = Lexer(spl_for_lexing)
@@ -236,7 +248,6 @@ def validate(
     
     # Phase 3: Semantic validation
     validate_sequence(ast, result)
-    from .src.analyzer.subsearch import validate_all_subsearches
     validate_all_subsearches(ast, result)
     validate_commands(ast, result, strict=strict)
     validate_limits(ast, result)
@@ -245,7 +256,6 @@ def validate(
     check_suggestions(ast, result)  # Best-practice and optimization suggestions
     
     # Phase 4: Field tracking
-    from .src.analyzer.fields import track_fields
     missing_sev = schema_missing_severity.lower().strip()
     if missing_sev not in {"error", "warning"}:
         missing_sev = "error"
@@ -419,7 +429,7 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                             options = cmd_parser.parse_options()
                             remaining = cmd_parser.get_remaining_tokens()
                             if remaining:
-                                from .src.parser.ast import Argument
+
                                 for tok in remaining:
                                     args.append(Argument(start=tok.start, end=tok.end, value=tok.value))
                                 if cmd_name == "search":
@@ -453,7 +463,7 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                         options = cmd_parser.parse_options()
                         remaining = cmd_parser.get_remaining_tokens()
                         if remaining:
-                            from .src.parser.ast import Argument
+
                             for tok in remaining:
                                 args.append(Argument(start=tok.start, end=tok.end, value=tok.value))
                             options.update(_scan_search_kv_options(remaining))
@@ -485,7 +495,7 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                     options = cmd_parser.parse_options()
                     remaining = cmd_parser.get_remaining_tokens()
                     if remaining:
-                        from .src.parser.ast import Argument
+
                         for tok in remaining:
                             args.append(Argument(start=tok.start, end=tok.end, value=tok.value))
                         options.update(_scan_search_kv_options(remaining))
@@ -655,7 +665,6 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                 aggregations = []
                 if cmd_start.type == TokenType.MACRO:
                     # Represent a macro invocation as an opaque "macro" command.
-                    from .src.parser.ast import Argument
                     args.append(Argument(start=cmd_start.start, end=cmd_start.end, value=cmd_start.value))
                     cmd_name = "macro"
                 elif len(cmd_tokens) > 1:  # Has more than just command name
@@ -667,7 +676,7 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                         stats_commands = {"stats", "chart", "timechart", "eventstats", "streamstats"}
                         if cmd_name.lower() in stats_commands:
                             # Store all tokens as args for field tracking to parse aliases
-                            from .src.parser.ast import Argument
+
                             for tok in arg_tokens:  # Skip command name
                                 if tok.type in (TokenType.IDENTIFIER, TokenType.AS):
                                     args.append(Argument(
@@ -695,7 +704,6 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                                 clauses['BY'] = by_clause
                         elif cmd_name.lower() in ("top", "rare"):
                             # top/rare syntax includes an optional leading number and an inline BY clause.
-                            from .src.parser.ast import Argument, Clause
 
                             options = cmd_parser.parse_options()
                             remaining = _normalize_positional_arg_tokens(cmd_parser.get_remaining_tokens())
@@ -749,8 +757,6 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                         elif cmd_name.lower() == "eval":
                             # Parse one or more assignments separated by commas:
                             #   eval a=expr, b=expr2
-                            from .src.parser.ast import Argument, Assignment
-
                             if not arg_tokens:
                                 result.add_error(
                                     "SPL014",
@@ -836,7 +842,7 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                                     # Recovery: treat as if a comma was present and continue.
                                     continue
                         elif cmd_name.lower() == "where":
-                            from .src.parser.ast import Argument
+
 
                             if not arg_tokens:
                                 result.add_error(
@@ -877,7 +883,7 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                             # We support options appearing before or after the field, but we do NOT
                             # allow extra tokens beyond [AS <field>]. Extra tokens usually indicate
                             # a missing pipe before the next command.
-                            from .src.parser.ast import Argument
+
 
                             bin_tokens = arg_tokens
                             consumed: set[int] = set()
@@ -985,7 +991,7 @@ def parse_simple(tokens: list[Token], result: ValidationResult) -> Optional[Pipe
                                 clauses['BY'] = by_clause
                             # Capture remaining tokens as arguments
                             remaining = _normalize_positional_arg_tokens(cmd_parser.get_remaining_tokens())
-                            from .src.parser.ast import Argument
+
                             for item in _coalesce_dotted_identifiers(remaining):
                                 if isinstance(item, str):
                                     # Coalesced dotted field name
@@ -1183,10 +1189,8 @@ def validate_search_terms(cmd: Command, result: ValidationResult, *, warn_plain_
     
     Arbitrary text like "stupid validator" should warn.
     """
-    import re
-
     def _command_tokens() -> list[Token]:
-        lex_source = getattr(result, "_lex_spl", result.spl)
+        lex_source = result._lex_spl if result._lex_spl is not None else result.spl
         lexer = Lexer(lex_source)
         all_tokens = lexer.tokenize()
         out: list[Token] = []
@@ -1578,8 +1582,6 @@ def validate_functions(pipeline: Pipeline, result: ValidationResult) -> None:
     validate top-level aggregations separately during parsing. ``fieldformat`` format
     strings are not re-lexed for nested function calls; see ``FunctionDef.command_usage_summary``.
     """
-    from .src.parser.ast import FunctionCall
-    
     for cmd in pipeline.commands:
         cmd_name = cmd.name.lower()
         
@@ -1602,8 +1604,6 @@ def validate_functions(pipeline: Pipeline, result: ValidationResult) -> None:
 
 def _find_function_calls(expr):
     """Yield FunctionCall nodes found within an expression tree."""
-    from .src.parser.ast import FunctionCall, BinaryOp, UnaryOp, Assignment
-
     if isinstance(expr, FunctionCall):
         yield expr
         return
@@ -1624,13 +1624,6 @@ def _find_function_calls(expr):
 
 def _validate_single_function(func_call, context: str, result: ValidationResult) -> None:
     """Validate a single function call."""
-    from .src.registry.functions import (
-        is_known_function,
-        validate_function_arity,
-        validate_function_context,
-    )
-    from .src.parser.ast import FunctionCall
-
     if not is_known_function(func_call.name):
         result.add_error(
             "SPL023",
@@ -1673,8 +1666,6 @@ def validate_semantics(pipeline: Pipeline, result: ValidationResult) -> None:
     - filtering-and-selection.md: where/dedup filter events
     - data-enrichment.md: join excludes non-matching, transaction orphans
     """
-    from .src.analyzer.limits import get_semantic_warning
-    
     for cmd in pipeline.commands:
         cmd_def = get_command(cmd.name)
         if not cmd_def:

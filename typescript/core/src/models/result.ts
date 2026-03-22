@@ -1,3 +1,4 @@
+import type { Pipeline } from "../ast.js";
 import type { Position } from "../tokens.js";
 
 export const Severity = {
@@ -21,7 +22,7 @@ export interface ValidationResult {
   spl: string;
   is_valid: boolean;
   issues: ValidationIssue[];
-  ast: unknown;
+  ast: Pipeline | null;
   errors: ValidationIssue[];
   warnings: ValidationIssue[];
   infos: ValidationIssue[];

@@ -44,9 +44,8 @@ async function main(): Promise<void> {
 
   const result = validate(spl, { strict });
   if (format === "json") {
-    const pipeline = result.ast as import("@spl-validator/core").Pipeline | null;
     console.log(
-      JSON.stringify(buildValidationJsonDict(result, pipeline, { warningGroups: advice }), null, 2),
+      JSON.stringify(buildValidationJsonDict(result, result.ast, { warningGroups: advice }), null, 2),
     );
     process.exit(result.is_valid ? 0 : 1);
   }

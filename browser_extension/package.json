@@ -1,0 +1,17 @@
+{
+  "name": "spl-validator-browser-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chromium extension that validates SPL via local spl-validator HTTP API",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "npm run build && node --test test/*.test.mjs && node scripts/check-dist.mjs",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "esbuild": "^0.25.0"
+  }
+}

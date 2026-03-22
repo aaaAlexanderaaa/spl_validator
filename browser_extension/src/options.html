@@ -14,7 +14,9 @@
     <h3>SPL Validator (local API)</h3>
     <p>
       Point this extension at the URL where <code>spl-validator-httpd</code> is listening (no trailing slash).
-      Start the server from the repo: <code>spl-validator-httpd --host 127.0.0.1 --port 8765</code>
+      Build the extension with <code>npm run build</code> in <code>browser_extension/</code>, then load the
+      <code>dist/</code> folder as unpacked. Start the server from the repo:
+      <code>spl-validator-httpd --host 127.0.0.1 --port 8765</code>
     </p>
     <label for="apiBase">API base URL</label>
     <input id="apiBase" type="text" autocomplete="off" />

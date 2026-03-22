@@ -57,7 +57,7 @@ python3 -m spl_validator --file=query.spl --format=json
 - **JSON contract**: machine output includes `output_schema_version` and `package_version` (see `spl_validator/contract.py`).
 - **HTTP API** (for integrations and the extension): `spl-validator-httpd --host 127.0.0.1 --port 8765` then `POST /validate` with JSON `{"spl":"...","strict":false,"advice":"optimization"}`; `GET /health`.
 - **TUI** (multiline editor, optional): `pip install -e ".[tui]"` then `spl-validator-tui` or `python3 -m spl_validator.tui_app`.
-- **Browser extension** (Chromium): open `chrome://extensions`, enable Developer Mode, **Load unpacked** → select the `browser_extension/` directory. Ensure the HTTP server is running and matches the URL in the extension options.
+- **Browser extension** (Chromium): build `browser_extension/dist` with `cd browser_extension && npm install && npm run build`, then **Load unpacked** → pick **`browser_extension/dist`**. Run `spl-validator-httpd` and set the API URL in extension options (defaults to `http://127.0.0.1:8765`). Automated checks: `npm test` (esbuild bundle + Node mocks) and `xvfb-run -a npm run test:e2e` (Playwright loads the real extension against the Python httpd), or run `./tools/run_browser_extension_e2e.sh` from the repo root.
 
 ## Development
 

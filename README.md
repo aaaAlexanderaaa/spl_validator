@@ -61,6 +61,8 @@ python3 -m spl_validator --file=query.spl --format=json
 
 ## Development
 
+**Environment setup** (recommended): from the repository root run `./tools/setup_environment.sh`. It creates `.venv/`, installs `spl-validator` in editable mode with **`[dev,tui]`** extras, runs `npm ci` under `browser_extension/`, and installs Playwright’s Chromium build for extension e2e tests. Activate the venv with `source .venv/bin/activate`.
+
 Run tests from the repository root (after `pip install -e .`, or with `PYTHONPATH` set to the repo root):
 
 ```bash

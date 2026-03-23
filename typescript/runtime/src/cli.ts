@@ -11,6 +11,21 @@ function readStdin(): Promise<string> {
   });
 }
 
+const USAGE = `Usage: spl-validator-ts [options] [SPL]
+
+Options:
+  --spl SPL         SPL query string to validate
+  --file PATH       Read SPL from file
+  --strict          Treat unknown commands as errors
+  --format=json     Output as JSON (default: text)
+  --advice=GROUP    Warning groups: all, optimization, none, or comma-separated
+  -h, --help        Show this help message
+
+Examples:
+  spl-validator-ts --spl "index=web | stats count BY host"
+  spl-validator-ts --format=json "index=web | stats count"
+  echo "index=web | head 5" | spl-validator-ts --format=json`;
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   let spl = "";
@@ -20,7 +35,10 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
-    if (a === "--strict") strict = true;
+    if (a === "-h" || a === "--help") {
+      console.log(USAGE);
+      process.exit(0);
+    } else if (a === "--strict") strict = true;
     else if (a === "--format=json") format = "json";
     else if (a.startsWith("--advice=")) advice = a.slice("--advice=".length);
     else if (a === "--spl" && args[i + 1]) {

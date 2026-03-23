@@ -166,7 +166,9 @@ def main(argv: Optional[list[str]] = None) -> None:
             print(f"Error in config file {cfg_path}: {e}", file=sys.stderr)
             sys.exit(1)
 
-    parser = argparse.ArgumentParser(description="SPL Validator HTTP — POST /validate JSON {spl, ...}")
+    parser = argparse.ArgumentParser(
+        description="SPL Validator HTTP server — serves a web UI at GET /, a validation API at POST /validate, and a health endpoint at GET /health",
+    )
     if cfg_arg_defaults:
         parser.set_defaults(**cfg_arg_defaults)
     parser.add_argument("--host", default="127.0.0.1")

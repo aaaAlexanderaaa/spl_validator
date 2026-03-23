@@ -18,25 +18,23 @@ This installs the `spl_validator` package and the **PyYAML** dependency used by 
 ## Quickstart
 
 ```bash
+# Simple queries
 python3 -m spl_validator --spl="index=web | stats count BY host | sort -count"
-python3 -m spl_validator --strict --spl="| makeresults | `my_macro(arg)` | stats count"
-python3 -m spl_validator --file=query.spl --format=json
-# Paste-friendly (no inline shell quoting for multiline):
-python3 -m spl_validator < query.spl
-cat query.spl | python3 -m spl_validator --format=json
 python3 -m spl_validator 'index=web | stats count BY host'
+python3 -m spl_validator --strict --spl="| makeresults | `my_macro(arg)` | stats count"
+
+# Complex multiline queries — no shell quoting needed
+python3 -m spl_validator --clipboard               # validate from system clipboard
+python3 -m spl_validator --file=query.spl           # read from file
+python3 -m spl_validator --edit                     # open $EDITOR, validate on save
+python3 -m spl_validator < query.spl                # pipe/redirect
+cat query.spl | python3 -m spl_validator --format=json
+
+# Web UI — paste and validate in the browser (recommended for complex queries)
+spl-validator-httpd --open                          # opens http://localhost:8765
 ```
 
 Optional defaults file: `.spl-validator.yaml` or `SPL_VALIDATOR_CONFIG` (see `spl_validator/examples/defaults.example.yaml`). Optional **registry packs** (YAML) extend commands: `--registry-pack PATH` (repeatable).
-
-### `prod` branch integrations
-
-On branch **`prod`**, the same validator also ships:
-
-- **HTTP**: `python3 -m spl_validator.httpd` then `POST /validate` with JSON `{"spl":"..."}` (CORS enabled for local tooling).
-- **TUI**: `pip install -e ".[tui]"` then `python3 -m spl_validator.tui` or `spl-validator-tui`.
-- **Browser**: build `browser_extension/dist` (`npm run build` in `browser_extension/`) and load that folder as unpacked; it talks to the local HTTP server.
-- **Contract**: JSON Schema for default API output in `docs/contract/cli-json-output.schema.json` (for ports / CI).
 
 Full roadmap: [`PLAN.md`](PLAN.md).
 
@@ -65,15 +63,19 @@ Full roadmap: [`PLAN.md`](PLAN.md).
   - `--schema schema.json` enables field availability checks
   - `--schema-missing error|warning` controls severity when fields are known
 
-## Interfaces (CLI, HTTP API, TUI, browser extension)
+## Interfaces (Web UI, CLI, HTTP API, TUI, browser extension)
 
+- **Web UI** (recommended for complex queries): `spl-validator-httpd --open` starts the HTTP server and opens `http://localhost:8765` in the browser. Paste SPL directly, press Ctrl+Enter to validate; toggle Strict / Advice settings live. Results include formatted summaries and collapsible JSON with a Copy button. Optional auto-validate on paste.
 - **CLI** (stdin, positional SPL, presets): `python3 -m spl_validator --help`
   - Pipe SPL: `echo 'index=web | stats count' | python3 -m spl_validator --format=json` (or `--stdin`)
   - Positional: `python3 -m spl_validator --format=json 'index=web | stats count'`
+  - Clipboard: `python3 -m spl_validator --clipboard` (requires `xclip`/`xsel` on Linux, `pbpaste` on macOS)
+  - Editor: `python3 -m spl_validator --edit` (opens `$EDITOR` to compose the query; comments stripped)
+  - File: `python3 -m spl_validator --file=query.spl`
   - Presets: `--preset=strict` or `--preset=security_content` (strict + `--advice=all`)
 - **JSON contract**: machine output includes `output_schema_version` and `package_version` (see `spl_validator/contract.py`).
-- **HTTP API** (for integrations and the extension): `spl-validator-httpd --host 127.0.0.1 --port 8765` then `POST /validate` with JSON `{"spl":"...","strict":false,"advice":"optimization"}`; `GET /health`.
-- **TUI** (multiline editor, optional): `pip install -e ".[tui]"` then `spl-validator-tui` or `python3 -m spl_validator.tui_app`.
+- **HTTP API** (for integrations and the extension): `spl-validator-httpd --host 127.0.0.1 --port 8765`; endpoints: `GET /` (web UI), `POST /validate` with JSON `{"spl":"...","strict":false,"advice":"optimization"}`, `GET /health`.
+- **TUI** (multiline Textual editor, optional): `pip install -e ".[tui]"` then `spl-validator-tui` or `python3 -m spl_validator.tui_app`. Supports `--file=query.spl` to pre-load a file. Features tabbed output (Summary + JSON), file-open dialog (Ctrl+O), and interactive Strict / Advice controls.
 - **Browser extension** (Chromium): build `browser_extension/dist` with `cd browser_extension && npm install && npm run build`, then **Load unpacked** → pick **`browser_extension/dist`**. Run `spl-validator-httpd` and set the API URL in extension options (defaults to `http://127.0.0.1:8765`). Automated checks: `npm test` (esbuild bundle + Node mocks) and `xvfb-run -a npm run test:e2e` (Playwright loads the real extension against the Python httpd), or run `./tools/run_browser_extension_e2e.sh` from the repo root.
 
 ## Development

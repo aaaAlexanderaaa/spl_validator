@@ -191,6 +191,70 @@ def test_tui_app_import_does_not_require_textual_at_import_time():
     import spl_validator.tui_app  # noqa: F401
 
 
+def test_tui_legacy_import():
+    """`spl_validator.tui` should also import without error."""
+    import spl_validator.tui  # noqa: F401
+
+
+def test_http_get_root_returns_web_ui(httpd_server: int):
+    """GET / should return the web UI HTML, not JSON."""
+    with urllib.request.urlopen(f"http://127.0.0.1:{httpd_server}/", timeout=2) as r:
+        assert r.status == 200
+        ct = r.headers.get("Content-Type", "")
+        assert "text/html" in ct
+        body = r.read().decode("utf-8")
+        assert "<title>SPL Validator</title>" in body
+        assert 'fetch("/validate"' in body
+
+
+def test_cli_file_flag():
+    """--file reads SPL from a file."""
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(suffix=".spl", mode="w", delete=False) as f:
+        f.write("index=web | stats count BY host\n")
+        tmp = f.name
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-m", "spl_validator", "--format=json", "--file", tmp],
+            cwd=_repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert proc.returncode == 0, proc.stderr
+        data = json.loads(proc.stdout)
+        assert data["valid"] is True
+    finally:
+        os.unlink(tmp)
+
+
+def test_cli_edit_flag_rejects_when_sources_conflict():
+    """--edit combined with --spl should error."""
+    proc = subprocess.run(
+        [sys.executable, "-m", "spl_validator", "--edit", "--spl", "index=web"],
+        cwd=_repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode != 0
+    assert "one of" in proc.stderr.lower() or "error" in proc.stderr.lower()
+
+
+def test_cli_clipboard_flag_rejects_when_sources_conflict():
+    """--clipboard combined with --spl should error."""
+    proc = subprocess.run(
+        [sys.executable, "-m", "spl_validator", "--clipboard", "--spl", "index=web"],
+        cwd=_repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode != 0
+    assert "one of" in proc.stderr.lower() or "error" in proc.stderr.lower()
+
+
 @pytest.mark.skipif(
     os.environ.get("RUN_TEXTUAL_SMOKE") != "1",
     reason="Set RUN_TEXTUAL_SMOKE=1 to run one-shot Textual smoke (requires textual and a TTY).",

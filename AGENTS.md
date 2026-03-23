@@ -20,7 +20,7 @@ Python remains the **canonical registry**; after editing `spl_validator` command
 ### Running services
 
 - **TypeScript (primary for setup):** from `typescript/`: `npm install`, then `npm run build -w @spl-validator/core`, `npm run test -w @spl-validator/core`, and optionally `npm run build -w @spl-validator/extension`. CLI: `node runtime/dist/cli.js` or the `spl-validator-ts` bin from `@spl-validator/runtime` after build.
-- **Python tests:** `pytest tests/` from the repo root (302 tests; 2 skipped by design).
+- **Python tests:** `pytest tests/` from the repo root (307 tests; 2 skipped by design).
 - **Web UI (recommended for complex queries):** `spl-validator-httpd --open` (or `python3 -m spl_validator.httpd --open`) — opens `http://localhost:8765` with a dark-themed paste-and-validate interface. Ctrl+Enter to validate, optional auto-validate on paste, structured results + collapsible JSON. No files or shell quoting needed.
 - **CLI:** `python3 -m spl_validator --spl="index=web | stats count BY host"` (or `--format=json`). For complex multiline queries, use `--clipboard` (reads system clipboard), `--file=query.spl`, or `--edit` to open `$EDITOR`.
 - **TUI:** `spl-validator-tui` (or `python3 -m spl_validator.tui_app`). Supports `--file=query.spl` to pre-load a file. Features tabbed output (Summary + JSON), interactive Strict/Advice controls, and file open dialog (Ctrl+O).
@@ -32,7 +32,7 @@ Python remains the **canonical registry**; after editing `spl_validator` command
 
 - The scripts installed via `pip install -e .` (e.g. `spl-validator-httpd`, `pytest`) land in `~/.local/bin`. Ensure `PATH` includes `$HOME/.local/bin`.
 - No dedicated Python linter (ruff, flake8, mypy) is configured in the repo. `pytest tests/` is the primary quality gate.
-- `tests/test_security_content_scan.py` and the TUI headless smoke test are intentionally skipped unless specific env vars (`SECURITY_CONTENT_ROOT`, `RUN_TUI_HEADLESS_SMOKE`) are set.
+- `tests/test_security_content_scan.py` and the TUI headless smoke test are intentionally skipped unless specific env vars (`SECURITY_CONTENT_ROOT`, `RUN_TEXTUAL_SMOKE`) are set.
 - The HTTP server is stdlib-only (`http.server.ThreadingHTTPServer`) — no Flask/FastAPI dependency needed.
 - Python >=3.10 is required (uses `match` statements and `X | Y` union types).
 - Browser extension E2E tests require Playwright Chromium (`npx playwright install chromium`) and `xvfb` (`sudo apt install xvfb`). Run via `xvfb-run -a npm run test:e2e` from `browser_extension/`. Playwright auto-starts the HTTP server on port 19999 for E2E.

@@ -99,12 +99,17 @@ Examples:
   python3 -m spl_validator 'index=web | stats count'
   echo 'index=web | stats count' | python3 -m spl_validator --stdin --format=json
   python3 -m spl_validator --file=query.spl
-  python3 -m spl_validator --file=- < query.spl
   python3 -m spl_validator < query.spl
   cat query.spl | python3 -m spl_validator --format=json
   python3 -m spl_validator --preset=security_content --spl="index=web | stats count"
-  python3 -m spl_validator --registry-pack=spl_validator/registry_packs/example_pack.yaml \\
-      --spl "index=* | mycustomcmd"
+
+Complex multiline queries (no shell quoting needed):
+  python3 -m spl_validator --clipboard              # validate from system clipboard
+  python3 -m spl_validator --edit                   # open $EDITOR to compose query
+  python3 -m spl_validator --file=query.spl         # read from file
+
+Web UI (paste and validate in the browser):
+  spl-validator-httpd --open                        # opens http://localhost:8765
         """,
     )
     if cfg_arg_defaults:
@@ -275,7 +280,7 @@ Examples:
         spl = _read_clipboard()
         if spl is None:
             print(
-                "Error: Could not read from clipboard. Install xclip or xsel (Linux) or use pbpaste (macOS).",
+                "Error: Could not read from clipboard. Install xclip or xsel (Linux), pbpaste (macOS), or powershell (Windows).",
                 file=sys.stderr,
             )
             sys.exit(1)

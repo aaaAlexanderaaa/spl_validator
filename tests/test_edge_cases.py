@@ -513,3 +513,136 @@ class TestCliEdgeCases:
             check=False,
         )
         assert proc.returncode == 1
+
+
+# ── Diagnostic code coverage ─────────────────────────────────────────
+
+class TestDiagnosticCodeCoverage:
+    """Ensure every emitted diagnostic code has at least one targeted test."""
+
+    def test_spl006_unknown_command_warning(self):
+        r = validate("index=web | totallyunknowncmd789")
+        codes = {w.code for w in r.warnings}
+        assert "SPL006" in codes
+
+    def test_spl007_invalid_character(self):
+        r = validate("index=web | eval x=\x01")
+        codes = {e.code for e in r.errors}
+        assert "SPL007" in codes
+
+    def test_spl009_unclosed_paren_in_stats(self):
+        r = validate("index=web | stats sum(count(")
+        codes = {e.code for e in r.errors}
+        assert "SPL009" in codes
+
+    def test_spl040_bare_lookup(self):
+        r = validate("index=web | lookup")
+        codes = {w.code for w in r.warnings}
+        assert "SPL040" in codes
+
+    def test_spl041_rest_non_services_uri(self):
+        r = validate("| makeresults | rest uri=http://example.com/foo")
+        codes = {w.code for w in r.warnings}
+        assert "SPL041" in codes
+
+    def test_spl042_bare_rest(self):
+        r = validate("| makeresults | rest")
+        codes = {w.code for w in r.warnings}
+        assert "SPL042" in codes
+
+    def test_limsub_appendcols(self):
+        r = validate("index=web | appendcols [search index=dns | stats count]")
+        codes = {w.code for w in r.warnings}
+        assert "LIMSUB" in codes
+
+    def test_limapp_append(self):
+        r = validate("index=web | append [search index=dns]")
+        codes = {w.code for w in r.warnings}
+        assert "LIMAPP" in codes
+
+    def test_limmve_mvexpand(self):
+        r = validate("index=web | mvexpand myfield")
+        codes = {w.code for w in r.warnings}
+        assert "LIMMVE" in codes
+
+    def test_best012_lowercase_not(self):
+        r = validate("index=web not error")
+        codes = {w.code for w in r.warnings}
+        assert "BEST012" in codes
+
+    def test_spl050_plain_search_without_index(self):
+        r = validate("error 404")
+        codes = {w.code for w in r.warnings}
+        assert "SPL050" in codes
+
+    def test_sem_ded_dedup(self):
+        r = validate("index=web | dedup host")
+        codes = {w.code for w in r.warnings}
+        assert "SEM-DED" in codes
+
+    def test_sem_joi_join(self):
+        r = validate("index=web | join host [search index=dns | head 100]")
+        codes = {w.code for w in r.warnings}
+        assert "SEM-JOI" in codes
+
+    def test_sem_reg_regex(self):
+        r = validate('index=web | regex _raw="error"')
+        codes = {w.code for w in r.warnings}
+        assert "SEM-REG" in codes
+
+    def test_sem_map_map(self):
+        r = validate('| makeresults | map search="index=web"')
+        codes = {w.code for w in r.warnings}
+        assert "SEM-MAP" in codes
+
+    def test_sem_top_top(self):
+        r = validate("index=web | top host")
+        codes = {w.code for w in r.warnings}
+        assert "SEM-TOP" in codes
+
+    def test_sem_rar_rare(self):
+        r = validate("index=web | rare host")
+        codes = {w.code for w in r.warnings}
+        assert "SEM-RAR" in codes
+
+    def test_sem_tra_transaction(self):
+        r = validate("index=web | transaction host")
+        codes = {w.code for w in r.warnings}
+        assert "SEM-TRA" in codes
+
+    def test_sem_loo_lookup(self):
+        r = validate("index=web | lookup mytable field")
+        codes = {w.code for w in r.warnings}
+        assert "SEM-LOO" in codes
+
+
+# ── Registry parity test ─────────────────────────────────────────────
+
+class TestRegistryParity:
+    """Ensure Python and TypeScript registries stay in sync."""
+
+    def test_ts_registry_command_count_matches_python(self):
+        import json as _json
+        from spl_validator.src.registry.commands import COMMANDS
+        registry_path = _repo_root / "typescript" / "core" / "src" / "generated" / "registryData.json"
+        with open(registry_path) as f:
+            data = _json.load(f)
+        ts_commands = set(data["commands"].keys())
+        py_commands = set(COMMANDS.keys())
+        assert ts_commands == py_commands, (
+            f"Command mismatch — Python-only: {py_commands - ts_commands}, "
+            f"TS-only: {ts_commands - py_commands}"
+        )
+
+    def test_ts_registry_function_count_matches_python(self):
+        import json as _json
+        from spl_validator.src.registry.functions import FUNCTIONS
+        registry_path = _repo_root / "typescript" / "core" / "src" / "generated" / "registryData.json"
+        with open(registry_path) as f:
+            data = _json.load(f)
+        ts_functions = set(data["functions"].keys())
+        py_functions = set(FUNCTIONS.keys())
+        assert ts_functions == py_functions, (
+            f"Function mismatch — Python-only: {py_functions - ts_functions}, "
+            f"TS-only: {ts_functions - py_functions}"
+        )

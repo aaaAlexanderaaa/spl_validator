@@ -1,0 +1,133 @@
+{
+    "golden_format_version": 1,
+    "tests": [
+        {
+            "name": "spl006_unknown_command_warning",
+            "description": "Unknown command in non-strict mode emits SPL006 warning",
+            "spl": "index=web | totallyunknowncmd789",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SPL006"]
+            }
+        },
+        {
+            "name": "spl009_unclosed_paren_in_stats",
+            "description": "Unclosed parenthesis in stats aggregation",
+            "spl": "index=web | stats sum(count(",
+            "expected": {
+                "valid": false,
+                "error_codes": ["SPL009"]
+            }
+        },
+
+
+        {
+            "name": "limsub_appendcols",
+            "description": "appendcols triggers LIMSUB subsearch limit",
+            "spl": "index=web | appendcols [search index=dns | stats count]",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["LIMSUB"]
+            }
+        },
+        {
+            "name": "limapp_append",
+            "description": "append triggers LIMAPP append limit",
+            "spl": "index=web | append [search index=dns]",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["LIMAPP"]
+            }
+        },
+        {
+            "name": "limmve_mvexpand",
+            "description": "mvexpand triggers LIMMVE memory limit",
+            "spl": "index=web | mvexpand myfield",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["LIMMVE"]
+            }
+        },
+        {
+            "name": "spl050_plain_search_without_index",
+            "description": "Plain search term without index/sourcetype warns SPL050",
+            "spl": "error 404",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SPL050"]
+            }
+        },
+        {
+            "name": "sem_ded_dedup",
+            "description": "dedup triggers SEM-DED semantic warning",
+            "spl": "index=web | dedup host",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-DED"]
+            }
+        },
+        {
+            "name": "sem_joi_join",
+            "description": "join triggers SEM-JOI semantic warning",
+            "spl": "index=web | join host [search index=dns | head 100]",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-JOI"]
+            }
+        },
+        {
+            "name": "sem_reg_regex",
+            "description": "regex triggers SEM-REG semantic warning",
+            "spl": "index=web | regex _raw=\"error\"",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-REG"]
+            }
+        },
+        {
+            "name": "sem_map_map",
+            "description": "map triggers SEM-MAP semantic warning",
+            "spl": "| makeresults | map search=\"index=web\"",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-MAP"]
+            }
+        },
+        {
+            "name": "sem_top_top",
+            "description": "top triggers SEM-TOP semantic warning",
+            "spl": "index=web | top host",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-TOP"]
+            }
+        },
+        {
+            "name": "sem_rar_rare",
+            "description": "rare triggers SEM-RAR semantic warning",
+            "spl": "index=web | rare host",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-RAR"]
+            }
+        },
+        {
+            "name": "sem_tra_transaction",
+            "description": "transaction triggers SEM-TRA semantic warning",
+            "spl": "index=web | transaction host",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-TRA"]
+            }
+        },
+        {
+            "name": "sem_loo_lookup",
+            "description": "lookup triggers SEM-LOO semantic warning",
+            "spl": "index=web | lookup mytable field",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-LOO"]
+            }
+        }
+    ]
+}

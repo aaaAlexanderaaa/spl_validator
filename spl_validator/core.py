@@ -15,6 +15,7 @@ from .src.registry.functions import (
     validate_function_context,
 )
 from .src.analyzer import validate_sequence, get_limit
+from .src.analyzer.commands import validate_command_specific
 from .src.analyzer.suggestions import check_suggestions
 from .src.analyzer.subsearch import validate_all_subsearches
 from .src.analyzer.fields import track_fields
@@ -1068,6 +1069,7 @@ def validate_commands(pipeline: Pipeline, result: ValidationResult, *, strict: b
             continue
 
         _validate_required_arguments(cmd, cmd_def, result)
+        validate_command_specific(cmd, result)
         if cmd.name.lower() == "search":
             validate_search_terms(cmd, result, warn_plain_text=(idx == 0))
 

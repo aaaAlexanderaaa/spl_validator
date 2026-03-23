@@ -20,8 +20,9 @@ Python remains the **canonical registry**; after editing `spl_validator` command
 ### Running services
 
 - **TypeScript (primary for setup):** from `typescript/`: `npm install`, then `npm run build -w @spl-validator/core`, `npm run test -w @spl-validator/core`, and optionally `npm run build -w @spl-validator/extension`. CLI: `node runtime/dist/cli.js` or the `spl-validator-ts` bin from `@spl-validator/runtime` after build.
-- **Python tests:** `pytest tests/` from the repo root (188 tests; 2 skipped by design).
-- **CLI:** `python3 -m spl_validator --spl="index=web | stats count BY host"` (or `--format=json`).
+- **Python tests:** `pytest tests/` from the repo root (302 tests; 2 skipped by design).
+- **CLI:** `python3 -m spl_validator --spl="index=web | stats count BY host"` (or `--format=json`). For complex multiline queries, use `--file=query.spl` or `--edit` to open `$EDITOR`.
+- **TUI:** `spl-validator-tui` (or `python3 -m spl_validator.tui_app`). Supports `--file=query.spl` to pre-load a file. Features tabbed output (Summary + JSON), interactive Strict/Advice controls, and file open dialog (Ctrl+O).
 - **HTTP API:** `python3 -m spl_validator.httpd --host 127.0.0.1 --port 8765` — serves `POST /validate` and `GET /health`.
 - **Browser extension unit tests:** `cd browser_extension && npm test` (builds with esbuild then runs Node test runner).
 - **Browser extension E2E:** `cd browser_extension && xvfb-run -a npm run test:e2e` (requires Playwright Chromium + xvfb).

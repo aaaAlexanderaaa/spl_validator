@@ -390,15 +390,26 @@ export function trackFields(
     if (!strictMissing && stage.index === 0) continue;
 
     const available = stage.fields_in;
-    for (const field of stage.referenced_fields) {
+    const missing: string[] = [];
+    for (const field of [...stage.referenced_fields].sort()) {
       if (field.startsWith("_") || field.includes("*")) continue;
       if (available.has(field)) continue;
+      missing.push(field);
+    }
 
-      const sug = `Available fields include: ${[...available].sort().slice(0, 5).join(", ")}...`;
-      if (strictMissing && stage.known_in && missingSev === "error") {
-        addError(result, "FLD001", `Field '${field}' does not exist in the current dataset/schema.`, cmd.start, cmd.end, sug);
+    if (missing.length === 0) continue;
+    const sug = `Available fields include: ${[...available].sort().slice(0, 5).join(", ")}...`;
+    if (strictMissing && stage.known_in && missingSev === "error") {
+      if (missing.length === 1) {
+        addError(result, "FLD001", `Field '${missing[0]}' does not exist in the current dataset/schema.`, cmd.start, cmd.end, sug);
       } else {
-        addWarning(result, "FLD001", `Field '${field}' may not exist. Check spelling.`, cmd.start, cmd.end, sug);
+        addError(result, "FLD001", `${missing.length} fields do not exist in the current dataset/schema: ${missing.join(", ")}`, cmd.start, cmd.end, sug);
+      }
+    } else {
+      if (missing.length === 1) {
+        addWarning(result, "FLD001", `Field '${missing[0]}' may not exist. Check spelling.`, cmd.start, cmd.end, sug);
+      } else {
+        addWarning(result, "FLD001", `${missing.length} fields may not exist at this point: ${missing.join(", ")}`, cmd.start, cmd.end, sug);
       }
     }
   }

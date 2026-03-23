@@ -38,10 +38,39 @@ function headLimit(cmd: Command): number {
   return firstIntArg(cmd) ?? 10;
 }
 
+function findConsecutiveRuns(lowerNames: string[], target: string): [number, number][] {
+  const runs: [number, number][] = [];
+  let runStart: number | null = null;
+  for (let i = 0; i < lowerNames.length; i++) {
+    if (lowerNames[i] === target) {
+      if (runStart === null) runStart = i;
+    } else {
+      if (runStart !== null && i - runStart >= 2) runs.push([runStart, i - 1]);
+      runStart = null;
+    }
+  }
+  if (runStart !== null && lowerNames.length - runStart >= 2) runs.push([runStart, lowerNames.length - 1]);
+  return runs;
+}
+
 export function checkSuggestions(pipeline: Pipeline, result: ValidationResult): void {
   const cmds = pipeline.commands;
   const lowerNames = cmds.map((c) => c.name.toLowerCase());
   const statsCount = lowerNames.filter((n) => n === "stats").length;
+
+  for (const [runStart, runEnd] of findConsecutiveRuns(lowerNames, "eval")) {
+    const count = runEnd - runStart + 1;
+    const first = cmds[runStart]!;
+    const last = cmds[runEnd]!;
+    addWarning(
+      result,
+      "BEST008",
+      `${count} consecutive eval commands (lines ${first.start.line}\u2013${last.start.line}) could be combined into one`,
+      first.start,
+      last.end,
+      "Use: `| eval field1=..., field2=..., field3=...` (comma-separated assignments).",
+    );
+  }
 
   for (let i = 0; i < cmds.length; i++) {
     const cmd = cmds[i]!;
@@ -145,17 +174,6 @@ export function checkSuggestions(pipeline: Pipeline, result: ValidationResult): 
           "Use `fields <needed_fields>` early, and `table <needed_fields>` only at the end.",
         );
       }
-    }
-
-    if (cmdName === "eval" && prevCmd === "eval") {
-      addWarning(
-        result,
-        "BEST008",
-        "Multiple consecutive eval commands may do extra passes over events",
-        cmd.start,
-        cmd.end,
-        "Combine assignments into a single eval using commas: `| eval a=..., b=...`.",
-      );
     }
 
     if (EXTRACTION_COMMANDS.has(cmdName)) {

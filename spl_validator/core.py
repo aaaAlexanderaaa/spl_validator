@@ -1519,14 +1519,22 @@ def validate_search_terms(cmd: Command, result: ValidationResult, *, warn_plain_
 
 
 def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
-    """Add limitation warnings for commands with default limits."""
+    """Add limitation warnings for commands with default limits.
+
+    Warnings for the same limit key are consolidated into one finding that
+    lists all affected command locations.
+    """
+    from collections import defaultdict
+
+    # Collect (limit_code, message) → list of (cmd.start, cmd.end, line)
+    limit_hits: dict[str, list[tuple]] = defaultdict(list)
+
     for cmd in pipeline.commands:
         cmd_def = get_command(cmd.name)
         
         if cmd_def and cmd_def.limit_key:
             cname = cmd.name.lower()
             if cname in ("head", "tail"):
-                # `head`/`tail` only have a "default 10" warning when a count is not specified.
                 has_count = False
                 if "limit" in cmd.options or "count" in cmd.options:
                     has_count = True
@@ -1545,7 +1553,6 @@ def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
             if cname == "sort":
                 if "limit" in cmd.options:
                     continue
-                # Optional leading count: `sort <N> - field` (only the first arg is the limit).
                 if cmd.args:
                     a0 = cmd.args[0]
                     if hasattr(a0, "value") and isinstance(a0.value, str):
@@ -1566,15 +1573,25 @@ def validate_limits(pipeline: Pipeline, result: ValidationResult) -> None:
 
             limit = get_limit(cmd_def.limit_key)
             if limit:
-                result.add_warning(
-                    f"LIM{cmd_def.limit_key.upper()[:3]}",
-                    f"{cmd.name}: {limit.message}",
-                    cmd.start,
-                    cmd.end
-                )
-    
-    # Note: Time bounds checking requires parsing search arguments (earliest=, latest=)
-    # which will be implemented in Phase 2 parser. Removed dead code that always warned.
+                code = f"LIM{cmd_def.limit_key.upper()[:3]}"
+                limit_hits[code].append((cmd, limit.message))
+
+    for code, hits in limit_hits.items():
+        if len(hits) == 1:
+            cmd, msg = hits[0]
+            result.add_warning(code, f"{cmd.name}: {msg}", cmd.start, cmd.end)
+        else:
+            lines = [str(cmd.start.line) for cmd, _ in hits]
+            cmd_names = list(dict.fromkeys(cmd.name for cmd, _ in hits))
+            first_cmd, msg = hits[0]
+            last_cmd = hits[-1][0]
+            names_str = "/".join(cmd_names)
+            result.add_warning(
+                code,
+                f"{len(hits)} {names_str} commands (lines {', '.join(lines)}): {msg}",
+                first_cmd.start,
+                last_cmd.end,
+            )
 
 
 def validate_functions(pipeline: Pipeline, result: ValidationResult) -> None:
@@ -1662,58 +1679,93 @@ def _validate_single_function(func_call, context: str, result: ValidationResult)
 
 def validate_semantics(pipeline: Pipeline, result: ValidationResult) -> None:
     """Add semantic warnings about command behaviors that may surprise users.
-    
-    KB Sources:
-    - aggregation-and-statistics.md: BY clause excludes nulls
-    - filtering-and-selection.md: where/dedup filter events
-    - data-enrichment.md: join excludes non-matching, transaction orphans
+
+    Warnings are consolidated so each semantic concept appears at most once,
+    listing all affected commands.
     """
+    by_clauses: list[tuple[Command, str]] = []
+    filter_cmds: list[Command] = []
+    semantic_key_hits: dict[str, list[tuple[Command, str, str | None]]] = {}
+
     for cmd in pipeline.commands:
         cmd_def = get_command(cmd.name)
         if not cmd_def:
             continue
-        
+
         cmd_name = cmd.name.lower()
-        
-        # 1. Check command-level semantic warning (from semantic_key)
-        if cmd_def.semantic_key:
-            # Skip BY warning if command has BY clause (dynamic warning below is more specific)
-            skip_warning = False
-            if cmd_def.semantic_key == "by_clause_excludes":
-                by_clause = cmd.clauses.get("BY")
-                if by_clause and hasattr(by_clause, 'fields') and by_clause.fields:
-                    skip_warning = True  # Dynamic warning below will cover this
-            
-            if not skip_warning:
-                warning = get_semantic_warning(cmd_def.semantic_key)
-                if warning:
-                    result.add_warning(
-                        f"SEM-{cmd_name[:3].upper()}",
-                        f"{cmd.name}: {warning.message}",
-                        cmd.start,
-                        cmd.end,
-                        suggestion=warning.suggestion
-                    )
-        
-        # 2. Check for BY clause on aggregation commands (dynamic warning with field names)
+
+        # Collect BY clauses
         if cmd_name in ("stats", "chart", "timechart", "eventstats", "streamstats"):
             by_clause = cmd.clauses.get("BY")
-            if by_clause and hasattr(by_clause, 'fields') and by_clause.fields:
+            if by_clause and hasattr(by_clause, "fields") and by_clause.fields:
                 fields_str = ", ".join(by_clause.fields)
-                result.add_warning(
-                    "SEM-BY",
-                    f"{cmd.name} BY {fields_str}: Events where '{fields_str}' is null/missing are EXCLUDED.",
-                    cmd.start,
-                    cmd.end,
-                    suggestion=f"Use 'fillnull {fields_str}' before {cmd.name} to include missing values."
-                )
-        
-        # 3. filters_events flag warning (for commands that remove events)
+                by_clauses.append((cmd, fields_str))
+
+        # Collect semantic_key warnings (skip BY-specific ones that have a BY clause)
+        if cmd_def.semantic_key:
+            skip = False
+            if cmd_def.semantic_key == "by_clause_excludes":
+                by_clause = cmd.clauses.get("BY")
+                if by_clause and hasattr(by_clause, "fields") and by_clause.fields:
+                    skip = True
+            if not skip:
+                warning = get_semantic_warning(cmd_def.semantic_key)
+                if warning:
+                    code = f"SEM-{cmd_name[:3].upper()}"
+                    semantic_key_hits.setdefault(code, []).append(
+                        (cmd, warning.message, warning.suggestion)
+                    )
+
+        # Collect filter commands
         if cmd_def.filters_events and not cmd_def.semantic_key:
-            # Only add generic filter warning if no specific semantic_key warning
+            filter_cmds.append(cmd)
+
+    # Emit consolidated SEM-BY
+    if len(by_clauses) == 1:
+        cmd, fields_str = by_clauses[0]
+        result.add_warning(
+            "SEM-BY",
+            f"{cmd.name} BY {fields_str}: Events where '{fields_str}' is null/missing are EXCLUDED.",
+            cmd.start, cmd.end,
+            suggestion=f"Use 'fillnull {fields_str}' before {cmd.name} to include missing values.",
+        )
+    elif len(by_clauses) > 1:
+        parts = [f"{cmd.name} BY {fs} (line {cmd.start.line})" for cmd, fs in by_clauses]
+        all_fields = list(dict.fromkeys(
+            f for _, fs in by_clauses for f in fs.split(", ")
+        ))
+        result.add_warning(
+            "SEM-BY",
+            f"{len(by_clauses)} aggregation commands use BY clauses — events with null BY fields are excluded: "
+            + "; ".join(parts),
+            by_clauses[0][0].start,
+            by_clauses[-1][0].end,
+            suggestion=f"Use 'fillnull {', '.join(all_fields[:5])}' before aggregations to include missing values.",
+        )
+
+    # Emit consolidated semantic_key warnings
+    for code, hits in semantic_key_hits.items():
+        if len(hits) == 1:
+            cmd, msg, suggestion = hits[0]
+            result.add_warning(code, f"{cmd.name}: {msg}", cmd.start, cmd.end, suggestion=suggestion)
+        else:
+            names = ", ".join(f"{cmd.name} (line {cmd.start.line})" for cmd, _, _ in hits)
+            _, msg, suggestion = hits[0]
             result.add_warning(
-                "SEM-FLT",
-                f"{cmd.name}: This command FILTERS (removes) events from results.",
-                cmd.start,
-                cmd.end
+                code,
+                f"{len(hits)} commands: {msg} — at {names}",
+                hits[0][0].start, hits[-1][0].end,
+                suggestion=suggestion,
             )
+
+    # Emit consolidated SEM-FLT
+    if len(filter_cmds) == 1:
+        cmd = filter_cmds[0]
+        result.add_warning("SEM-FLT", f"{cmd.name}: This command FILTERS (removes) events from results.", cmd.start, cmd.end)
+    elif len(filter_cmds) > 1:
+        names = ", ".join(f"{c.name} (line {c.start.line})" for c in filter_cmds)
+        result.add_warning(
+            "SEM-FLT",
+            f"{len(filter_cmds)} commands filter/remove events: {names}",
+            filter_cmds[0].start, filter_cmds[-1].end,
+        )

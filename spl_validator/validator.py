@@ -13,6 +13,7 @@ if __name__ == "__main__" and __package__ is None:
 
 import argparse
 import json
+import os
 import sys
 from typing import Optional
 
@@ -21,6 +22,55 @@ from .core import validate
 from .json_payload import build_validation_json_dict
 from .src.models.warning_groups import group_warnings, parse_warning_groups
 from .src.registry.pack import load_registry_pack_file
+
+
+def _read_clipboard() -> Optional[str]:
+    """Read text from the system clipboard."""
+    import shutil
+    import subprocess
+
+    for cmd in (
+        ["xclip", "-selection", "clipboard", "-o"],
+        ["xsel", "--clipboard", "--output"],
+        ["pbpaste"],
+        ["powershell.exe", "-Command", "Get-Clipboard"],
+    ):
+        if shutil.which(cmd[0]) is None:
+            continue
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                return result.stdout
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+    return None
+
+
+def _open_editor_for_spl() -> Optional[str]:
+    """Open $EDITOR with a temp .spl file, return the contents (comments stripped)."""
+    import tempfile
+
+    editor = os.environ.get("EDITOR", os.environ.get("VISUAL", "nano"))
+    with tempfile.NamedTemporaryFile(
+        suffix=".spl", mode="w", delete=False, encoding="utf-8"
+    ) as f:
+        f.write("# Enter your SPL query below.\n")
+        f.write("# Lines starting with # are comments and will be ignored.\n")
+        f.write("# Save and close the editor to validate.\n\n")
+        tmp_path = f.name
+    try:
+        ret = os.system(f'{editor} "{tmp_path}"')
+        if ret != 0:
+            print(f"Editor exited with code {ret}", file=sys.stderr)
+            return None
+        with open(tmp_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        return "".join(line for line in lines if not line.lstrip().startswith("#"))
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
 
 
 def main():
@@ -49,12 +99,17 @@ Examples:
   python3 -m spl_validator 'index=web | stats count'
   echo 'index=web | stats count' | python3 -m spl_validator --stdin --format=json
   python3 -m spl_validator --file=query.spl
-  python3 -m spl_validator --file=- < query.spl
   python3 -m spl_validator < query.spl
   cat query.spl | python3 -m spl_validator --format=json
   python3 -m spl_validator --preset=security_content --spl="index=web | stats count"
-  python3 -m spl_validator --registry-pack=spl_validator/registry_packs/example_pack.yaml \\
-      --spl "index=* | mycustomcmd"
+
+Complex multiline queries (no shell quoting needed):
+  python3 -m spl_validator --clipboard              # validate from system clipboard
+  python3 -m spl_validator --edit                   # open $EDITOR to compose query
+  python3 -m spl_validator --file=query.spl         # read from file
+
+Web UI (paste and validate in the browser):
+  spl-validator-httpd --open                        # opens http://localhost:8765
         """,
     )
     if cfg_arg_defaults:
@@ -86,6 +141,16 @@ Examples:
         "--stdin",
         action="store_true",
         help="Read SPL from standard input (same as --file=-)",
+    )
+    parser.add_argument(
+        "--edit",
+        action="store_true",
+        help="Open $EDITOR to compose the SPL query (avoids shell quoting for complex multiline queries)",
+    )
+    parser.add_argument(
+        "--clipboard",
+        action="store_true",
+        help="Read SPL from the system clipboard (requires xclip/xsel on Linux, pbpaste on macOS)",
     )
     parser.add_argument(
         "--preset",
@@ -193,20 +258,40 @@ Examples:
 
     stdin_requested = bool(args.stdin) or (args.file == "-")
     file_path_requested = bool(args.file) and args.file != "-"
+    edit_requested = bool(args.edit)
+    clipboard_requested = bool(args.clipboard)
     sources = (
         (1 if args.spl_positional is not None else 0)
         + (1 if args.spl else 0)
         + (1 if file_path_requested else 0)
         + (1 if stdin_requested else 0)
+        + (1 if edit_requested else 0)
+        + (1 if clipboard_requested else 0)
     )
     if sources > 1:
-        parser.error("Use only one of: SPL positional argument, --spl, --file, or --stdin")
+        parser.error("Use only one of: SPL positional argument, --spl, --file, --edit, --clipboard, or --stdin")
 
     spl: Optional[str] = None
     if args.spl_positional is not None:
         spl = args.spl_positional
     elif args.spl:
         spl = args.spl
+    elif clipboard_requested:
+        spl = _read_clipboard()
+        if spl is None:
+            print(
+                "Error: Could not read from clipboard. Install xclip or xsel (Linux), pbpaste (macOS), or powershell (Windows).",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        if not spl.strip():
+            print("Clipboard is empty. Copy an SPL query first.", file=sys.stderr)
+            sys.exit(1)
+    elif edit_requested:
+        spl = _open_editor_for_spl()
+        if not spl or not spl.strip():
+            print("No SPL provided. Aborting.", file=sys.stderr)
+            sys.exit(1)
     elif stdin_requested:
         spl = sys.stdin.read()
     elif args.file:
@@ -224,7 +309,12 @@ Examples:
     else:
         parser.print_help()
         print(
-            "\nProvide SPL via --spl, --file, a positional SPL argument, --stdin, or pipe/heredoc on stdin.",
+            "\nProvide SPL via --spl, --file, --clipboard, --edit, a positional argument, --stdin, or pipe on stdin.\n"
+            "\nTIP for complex multiline queries:\n"
+            "  --clipboard     Validate whatever is on your clipboard right now\n"
+            "  --file=q.spl    Read from a file\n"
+            "  --edit          Open $EDITOR to compose the query\n"
+            "  Or start the web UI:  spl-validator-httpd --open",
             file=sys.stderr,
         )
         sys.exit(1)

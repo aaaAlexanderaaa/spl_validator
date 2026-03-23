@@ -23,9 +23,8 @@ tui = [
 
 [project.scripts]
 spl-validator = "spl_validator.validator:main"
-spl-validator-serve = "spl_validator.httpd:main"
 spl-validator-httpd = "spl_validator.httpd:main"
-spl-validator-tui = "spl_validator.tui:main"
+spl-validator-tui = "spl_validator.tui_app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

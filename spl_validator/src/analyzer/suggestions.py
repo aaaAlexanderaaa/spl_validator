@@ -51,11 +51,40 @@ def _head_limit(cmd: Command) -> int:
     return _first_int_arg(cmd) or 10
 
 
+def _find_consecutive_runs(lower_names: list[str], target: str) -> list[tuple[int, int]]:
+    """Return (start_idx, end_idx) for every run of >=2 consecutive *target* commands."""
+    runs: list[tuple[int, int]] = []
+    run_start: Optional[int] = None
+    for i, name in enumerate(lower_names):
+        if name == target:
+            if run_start is None:
+                run_start = i
+        else:
+            if run_start is not None and i - run_start >= 2:
+                runs.append((run_start, i - 1))
+            run_start = None
+    if run_start is not None and len(lower_names) - run_start >= 2:
+        runs.append((run_start, len(lower_names) - 1))
+    return runs
+
+
 def check_suggestions(pipeline: Pipeline, result: ValidationResult) -> None:
     """Add best-practice and optimization warnings based on common SPL patterns."""
     cmds = pipeline.commands
     lower_names = [c.name.lower() for c in cmds]
     stats_count = sum(1 for n in lower_names if n == "stats")
+
+    # BEST008: consecutive evals — emit one warning per run, not per pair
+    for run_start, run_end in _find_consecutive_runs(lower_names, "eval"):
+        count = run_end - run_start + 1
+        first, last = cmds[run_start], cmds[run_end]
+        result.add_warning(
+            "BEST008",
+            f"{count} consecutive eval commands (lines {first.start.line}\u2013{last.start.line}) could be combined into one",
+            first.start,
+            last.end,
+            suggestion="Use: `| eval field1=..., field2=..., field3=...` (comma-separated assignments).",
+        )
 
     for i, cmd in enumerate(cmds):
         cmd_name = lower_names[i]
@@ -147,16 +176,6 @@ def check_suggestions(pipeline: Pipeline, result: ValidationResult) -> None:
                     cmd.end,
                     suggestion="Use `fields <needed_fields>` early, and `table <needed_fields>` only at the end.",
                 )
-
-        # BEST008: consecutive evals can often be combined
-        if cmd_name == "eval" and prev_cmd == "eval":
-            result.add_warning(
-                "BEST008",
-                "Multiple consecutive eval commands may do extra passes over events",
-                cmd.start,
-                cmd.end,
-                suggestion="Combine assignments into a single eval using commas: `| eval a=..., b=...`.",
-            )
 
         # BEST009: extraction/parsing before filtering tends to be costly
         if cmd_name in _EXTRACTION_COMMANDS:

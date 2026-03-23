@@ -24,6 +24,28 @@ from .src.models.warning_groups import group_warnings, parse_warning_groups
 from .src.registry.pack import load_registry_pack_file
 
 
+def _read_clipboard() -> Optional[str]:
+    """Read text from the system clipboard."""
+    import shutil
+    import subprocess
+
+    for cmd in (
+        ["xclip", "-selection", "clipboard", "-o"],
+        ["xsel", "--clipboard", "--output"],
+        ["pbpaste"],
+        ["powershell.exe", "-Command", "Get-Clipboard"],
+    ):
+        if shutil.which(cmd[0]) is None:
+            continue
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                return result.stdout
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+    return None
+
+
 def _open_editor_for_spl() -> Optional[str]:
     """Open $EDITOR with a temp .spl file, return the contents (comments stripped)."""
     import tempfile
@@ -119,6 +141,11 @@ Examples:
         "--edit",
         action="store_true",
         help="Open $EDITOR to compose the SPL query (avoids shell quoting for complex multiline queries)",
+    )
+    parser.add_argument(
+        "--clipboard",
+        action="store_true",
+        help="Read SPL from the system clipboard (requires xclip/xsel on Linux, pbpaste on macOS)",
     )
     parser.add_argument(
         "--preset",
@@ -227,21 +254,34 @@ Examples:
     stdin_requested = bool(args.stdin) or (args.file == "-")
     file_path_requested = bool(args.file) and args.file != "-"
     edit_requested = bool(args.edit)
+    clipboard_requested = bool(args.clipboard)
     sources = (
         (1 if args.spl_positional is not None else 0)
         + (1 if args.spl else 0)
         + (1 if file_path_requested else 0)
         + (1 if stdin_requested else 0)
         + (1 if edit_requested else 0)
+        + (1 if clipboard_requested else 0)
     )
     if sources > 1:
-        parser.error("Use only one of: SPL positional argument, --spl, --file, --edit, or --stdin")
+        parser.error("Use only one of: SPL positional argument, --spl, --file, --edit, --clipboard, or --stdin")
 
     spl: Optional[str] = None
     if args.spl_positional is not None:
         spl = args.spl_positional
     elif args.spl:
         spl = args.spl
+    elif clipboard_requested:
+        spl = _read_clipboard()
+        if spl is None:
+            print(
+                "Error: Could not read from clipboard. Install xclip or xsel (Linux) or use pbpaste (macOS).",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        if not spl.strip():
+            print("Clipboard is empty. Copy an SPL query first.", file=sys.stderr)
+            sys.exit(1)
     elif edit_requested:
         spl = _open_editor_for_spl()
         if not spl or not spl.strip():
@@ -264,8 +304,12 @@ Examples:
     else:
         parser.print_help()
         print(
-            "\nProvide SPL via --spl, --file, --edit, a positional argument, --stdin, or pipe on stdin.\n"
-            "TIP: For complex multiline queries, use --file=query.spl or --edit to open your editor.",
+            "\nProvide SPL via --spl, --file, --clipboard, --edit, a positional argument, --stdin, or pipe on stdin.\n"
+            "\nTIP for complex multiline queries:\n"
+            "  --clipboard     Validate whatever is on your clipboard right now\n"
+            "  --file=q.spl    Read from a file\n"
+            "  --edit          Open $EDITOR to compose the query\n"
+            "  Or start the web UI:  spl-validator-httpd --open",
             file=sys.stderr,
         )
         sys.exit(1)

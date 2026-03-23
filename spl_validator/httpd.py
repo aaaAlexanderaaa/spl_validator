@@ -15,6 +15,7 @@ from .json_payload import build_validation_json_dict, package_version
 from .src.debug.schema import load_field_schema
 from .src.models.warning_groups import parse_warning_groups
 from .src.registry.pack import load_registry_pack_file
+from .web_ui import WEB_UI_HTML
 
 
 def _cors_headers(handler: BaseHTTPRequestHandler) -> dict[str, str]:
@@ -87,9 +88,17 @@ def make_handler_class(
             self.send_header("Content-Length", "0")
             self.end_headers()
 
+        def _send_html(self, code: int, html: str) -> None:
+            body = html.encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def do_GET(self) -> None:  # noqa: N802
             path = self._path()
-            if path in ("/", "/health"):
+            if path == "/health":
                 self._send_json(
                     200,
                     {
@@ -98,6 +107,9 @@ def make_handler_class(
                         "package_version": package_version(),
                     },
                 )
+                return
+            if path == "/":
+                self._send_html(200, WEB_UI_HTML)
                 return
             self._send_json(404, {"error": "not_found", "path": self.path})
 
@@ -175,6 +187,11 @@ def main(argv: Optional[list[str]] = None) -> None:
     )
     parser.add_argument("--registry-pack", action="append", default=[], metavar="PATH")
     parser.add_argument("--max-body", type=int, default=2_000_000)
+    parser.add_argument(
+        "--open",
+        action="store_true",
+        help="Auto-open the web UI in the default browser on startup",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -197,11 +214,18 @@ def main(argv: Optional[list[str]] = None) -> None:
         max_body=int(args.max_body),
     )
     httpd = ThreadingHTTPServer((args.host, args.port), handler_cls)
+    url = f"http://{args.host}:{args.port}"
     print(
-        f"spl-validator-httpd listening on http://{args.host}:{args.port} "
-        f"(POST /validate, GET /health)",
+        f"spl-validator-httpd listening on {url}\n"
+        f"  Web UI:    {url}/\n"
+        f"  API:       POST {url}/validate\n"
+        f"  Health:    GET  {url}/health",
         file=sys.stderr,
     )
+    if args.open:
+        import webbrowser
+
+        webbrowser.open(url)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

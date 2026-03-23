@@ -35,4 +35,6 @@ Python remains the **canonical registry**; after editing `spl_validator` command
 - Python >=3.10 is required (uses `match` statements and `X | Y` union types).
 - Browser extension E2E tests require Playwright Chromium (`npx playwright install chromium`) and `xvfb` (`sudo apt install xvfb`). Run via `xvfb-run -a npm run test:e2e` from `browser_extension/`. Playwright auto-starts the HTTP server on port 19999 for E2E.
 - The E2E test launches Chromium in non-headless mode with `--load-extension`; xvfb provides the virtual display on headless Linux.
+- The E2E spec must NOT use `channel: "chromium"` in `launchPersistentContext`; that option makes Playwright search for a system-installed Chromium (often a broken snap wrapper on Ubuntu) instead of its own downloaded binary. Omitting `channel` lets Playwright use its bundled Chrome for Testing.
+- To manually test either extension in the browser, use Playwright's Chromium binary at `~/.cache/ms-playwright/chromium-*/chrome-linux64/chrome` with `--no-sandbox --load-extension=<dist-path>`. Google Chrome (non-Chromium) blocks `--load-extension`.
 - See `README.md` for the full development setup and CLI usage reference.

@@ -1,0 +1,242 @@
+{
+    "golden_format_version": 1,
+    "tests": [
+        {
+            "name": "whitespace_only",
+            "description": "Only whitespace should be treated as empty pipeline",
+            "spl": "   \t  ",
+            "expected": {
+                "valid": false,
+                "error_codes": ["SPL005"]
+            }
+        },
+        {
+            "name": "trailing_pipe_tolerated",
+            "description": "Trailing pipe is tolerated by both implementations",
+            "spl": "index=web | stats count |",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "double_pipe",
+            "description": "Double pipe should produce an error",
+            "spl": "index=web || stats count",
+            "expected": {
+                "valid": false
+            }
+        },
+        {
+            "name": "leading_whitespace_then_pipe",
+            "description": "Whitespace before pipe, non-generating first command",
+            "spl": "  | stats count",
+            "expected": {
+                "valid": false,
+                "error_codes": ["SPL001"]
+            }
+        },
+        {
+            "name": "single_index_query",
+            "description": "Simplest valid query: just an index filter",
+            "spl": "index=main",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "unclosed_single_quote",
+            "description": "Unclosed single-quoted string literal",
+            "spl": "index=web | eval x='foo",
+            "expected": {
+                "valid": false,
+                "error_codes": ["SPL004"]
+            }
+        },
+        {
+            "name": "escaped_quotes_in_string",
+            "description": "Escaped double quotes inside a string",
+            "spl": "index=a | eval msg=\"say \\\"hi\\\"\"",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "many_pipes",
+            "description": "Long pipeline with many chained commands",
+            "spl": "index=web | stats count BY host | sort -count | head 10 | eval label=\"top\" | table host, count, label",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "stats_by_null_semantic",
+            "description": "stats BY should warn about null exclusion with advice=all",
+            "spl": "index=web | stats count BY host",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["LIMSTA", "SEM-BY"]
+            }
+        },
+        {
+            "name": "dedup_without_sort",
+            "description": "dedup without preceding sort should warn BEST001",
+            "spl": "index=web | dedup host",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST001"]
+            }
+        },
+        {
+            "name": "join_without_type",
+            "description": "join without explicit type= warns BEST002 and BEST010",
+            "spl": "index=web | join host [search index=dns | head 100]",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST002", "BEST010"]
+            }
+        },
+        {
+            "name": "transaction_warns_best003",
+            "description": "transaction always warns BEST003 (bounds not parsed into options)",
+            "spl": "index=web | transaction host",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST003"]
+            }
+        },
+        {
+            "name": "sort_then_head_unlimited",
+            "description": "sort followed by head without sort limit warns BEST005",
+            "spl": "index=web | sort - bytes | head 5",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST005"]
+            }
+        },
+        {
+            "name": "sort_unlimited_no_head",
+            "description": "sort without limit and no following head warns BEST006",
+            "spl": "index=web | stats count BY host | sort - count",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST006"]
+            }
+        },
+        {
+            "name": "table_star",
+            "description": "table * warns about performance BEST007",
+            "spl": "index=web | table *",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST007"]
+            }
+        },
+        {
+            "name": "consecutive_eval",
+            "description": "Two consecutive eval commands should warn BEST008",
+            "spl": "index=web | eval a=1 | eval b=2",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST008"]
+            }
+        },
+        {
+            "name": "extraction_before_filter",
+            "description": "rex before where warns BEST009",
+            "spl": "index=web | rex \"(?<ip>\\d+)\" | where ip!=\"0\"",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST009"]
+            }
+        },
+        {
+            "name": "mvexpand_warns",
+            "description": "mvexpand warns BEST013 about event multiplication",
+            "spl": "index=web | mvexpand myfield",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST013"]
+            }
+        },
+        {
+            "name": "spath_warns",
+            "description": "spath warns BEST014 about expensive parsing",
+            "spl": "index=web | spath",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["BEST014"]
+            }
+        },
+        {
+            "name": "limit_tail",
+            "description": "tail command triggers LIMTAI limit warning",
+            "spl": "index=web | tail",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["LIMTAI"]
+            }
+        },
+        {
+            "name": "limit_join_subsearch",
+            "description": "join triggers LIMJOI limit warning",
+            "spl": "index=web | join host [search index=dns | head 100]",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["LIMJOI"]
+            }
+        },
+        {
+            "name": "where_semantic",
+            "description": "where triggers SEM-WHE semantic warning",
+            "spl": "index=web | where status>400",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-WHE"]
+            }
+        },
+        {
+            "name": "head_filters_sem",
+            "description": "head triggers SEM-FLT semantic warning",
+            "spl": "index=web | head 5",
+            "expected": {
+                "valid": true,
+                "warning_codes": ["SEM-FLT"]
+            }
+        },
+        {
+            "name": "map_empty_search",
+            "description": "map with empty search argument is valid",
+            "spl": "| makeresults | map search=\"index=web host=$host$\"",
+            "expected": {
+                "valid": true
+            }
+        },
+        {
+            "name": "subsearch_empty_bracket",
+            "description": "Empty subsearch in join should error",
+            "spl": "index=web | join host []",
+            "expected": {
+                "valid": false,
+                "error_codes": ["SPL022"]
+            }
+        },
+        {
+            "name": "valid_json_output",
+            "description": "Valid SPL produces serializable JSON",
+            "spl": "index=main | stats count",
+            "expected": {
+                "valid": true,
+                "valid_json": true
+            }
+        },
+        {
+            "name": "invalid_json_output",
+            "description": "Invalid SPL still produces serializable JSON",
+            "spl": "",
+            "expected": {
+                "valid": false,
+                "valid_json": true
+            }
+        }
+    ]
+}

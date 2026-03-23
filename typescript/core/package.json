@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "npm run build && npx tsx --test test/golden.test.ts"
+    "test": "npm run build && npx tsx --test test/golden.test.ts test/edge_cases.test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

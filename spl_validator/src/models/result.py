@@ -1,8 +1,14 @@
 """Validation result models."""
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Any
+from typing import TYPE_CHECKING, Optional
+
 from ..lexer.tokens import Position
+
+if TYPE_CHECKING:
+    from ..parser.ast import Pipeline
 
 
 class Severity(Enum):
@@ -40,7 +46,8 @@ class ValidationResult:
     spl: str                    # Original SPL text
     is_valid: bool              # True if no errors (warnings OK)
     issues: list[ValidationIssue] = field(default_factory=list)
-    ast: Optional[Any] = None   # Parsed AST (if successful)
+    ast: Optional[Pipeline] = None   # Parsed AST (if successful)
+    _lex_spl: Optional[str] = None   # Lexer input after map/markdown preprocessing
     # Parallel lists for O(1) access (CLI/JSON iterate these repeatedly).
     errors: list[ValidationIssue] = field(default_factory=list, init=False, repr=False)
     warnings: list[ValidationIssue] = field(default_factory=list, init=False, repr=False)

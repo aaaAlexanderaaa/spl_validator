@@ -19,6 +19,10 @@ export class CommandParser {
 
   current(): Token {
     if (this.pos < this.tokens.length) return this.tokens[this.pos]!;
+    if (this.tokens.length === 0) {
+      const zero: Position = { line: 1, column: 1, offset: 0 };
+      return { type: TokenType.EOF, value: "", start: zero, end: zero };
+    }
     const last = this.tokens[this.tokens.length - 1]!;
     return { type: TokenType.EOF, value: "", start: last.end, end: last.end };
   }

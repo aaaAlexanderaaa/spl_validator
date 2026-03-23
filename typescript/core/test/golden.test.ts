@@ -21,7 +21,7 @@ function runCase(t: GoldenFile["tests"][0]): string[] {
   const failures: string[] = [];
   const { spl, expected, name } = t;
   const result = validate(spl, { strict: false });
-  const json = buildValidationJsonDict(result, result.ast as never, { warningGroups: "all" });
+  const json = buildValidationJsonDict(result, result.ast, { warningGroups: "all" });
 
   const expValid = expected.valid !== false;
   if (result.is_valid !== expValid) {

@@ -1,6 +1,6 @@
-# SPL Validator — `prod` branch roadmap
+# SPL Validator — Roadmap
 
-This branch is a **standalone integration line** (not intended to merge into `master`) that rolls up UX, distribution, architecture, and portability work in dependency order.
+UX, distribution, architecture, and portability work in dependency order.
 
 ## Phase 1 — Contract and tests
 
@@ -33,8 +33,4 @@ This branch is a **standalone integration line** (not intended to merge into `ma
 
 ## Phase 7 — Second implementation (WASM / other language)
 
-- [ ] Not started on this branch; use golden JSON + schema + registry pack YAML as the portability contract when you begin.
-
-## Maintenance
-
-- Keep `master` free of experimental packaging and extension assets if desired; develop integrations on **`prod`** and cherry-pick validator-core fixes back to `master` as needed.
+- [x] TypeScript implementation under `typescript/` (core library, Node CLI, standalone MV3 extension). Uses golden JSON + schema as the portability contract.

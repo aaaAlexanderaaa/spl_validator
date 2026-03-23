@@ -183,37 +183,57 @@ def track_fields(
     )
 
     # Emit issues based on fields-in at each stage.
+    # Collect all missing fields per command so we emit one finding per site.
     strict_missing = schema_fields is not None
     for stage in stages:
         cmd = pipeline.commands[stage.index]
 
-        # Preserve historical behavior: without schema, skip first command (usually generating search).
         if not strict_missing and stage.index == 0:
             continue
 
         available = stage.fields_in
         referenced = stage.referenced_fields
-        for field in referenced:
+        missing: list[str] = []
+        for field in sorted(referenced):
             if field.startswith("_") or "*" in field:
                 continue
             if field in available:
                 continue
+            missing.append(field)
 
-            if strict_missing and stage.known_in and missing_field_severity == Severity.ERROR:
+        if not missing:
+            continue
+
+        avail_hint = ", ".join(sorted(list(available)[:5])) + "..."
+        if strict_missing and stage.known_in and missing_field_severity == Severity.ERROR:
+            if len(missing) == 1:
                 result.add_error(
                     "FLD001",
-                    f"Field '{field}' does not exist in the current dataset/schema.",
-                    cmd.start,
-                    cmd.end,
-                    suggestion=f"Available fields include: {', '.join(sorted(list(available)[:5]))}...",
+                    f"Field '{missing[0]}' does not exist in the current dataset/schema.",
+                    cmd.start, cmd.end,
+                    suggestion=f"Available fields include: {avail_hint}",
+                )
+            else:
+                result.add_error(
+                    "FLD001",
+                    f"{len(missing)} fields do not exist in the current dataset/schema: {', '.join(missing)}",
+                    cmd.start, cmd.end,
+                    suggestion=f"Available fields include: {avail_hint}",
+                )
+        else:
+            if len(missing) == 1:
+                result.add_warning(
+                    "FLD001",
+                    f"Field '{missing[0]}' may not exist. Check spelling.",
+                    cmd.start, cmd.end,
+                    suggestion=f"Available fields include: {avail_hint}",
                 )
             else:
                 result.add_warning(
                     "FLD001",
-                    f"Field '{field}' may not exist. Check spelling.",
-                    cmd.start,
-                    cmd.end,
-                    suggestion=f"Available fields include: {', '.join(sorted(list(available)[:5]))}...",
+                    f"{len(missing)} fields may not exist at this point: {', '.join(missing)}",
+                    cmd.start, cmd.end,
+                    suggestion=f"Available fields include: {avail_hint}",
                 )
 
 

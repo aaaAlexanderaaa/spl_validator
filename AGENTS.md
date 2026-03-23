@@ -38,3 +38,20 @@ Python remains the **canonical registry**; after editing `spl_validator` command
 - The E2E spec must NOT use `channel: "chromium"` in `launchPersistentContext`; that option makes Playwright search for a system-installed Chromium (often a broken snap wrapper on Ubuntu) instead of its own downloaded binary. Omitting `channel` lets Playwright use its bundled Chrome for Testing.
 - To manually test either extension in the browser, use Playwright's Chromium binary at `~/.cache/ms-playwright/chromium-*/chrome-linux64/chrome` with `--no-sandbox --load-extension=<dist-path>`. Google Chrome (non-Chromium) blocks `--load-extension`.
 - See `README.md` for the full development setup and CLI usage reference.
+
+### Task in Setup Environment
+
+You are allow to optimize the project when setting up the environment, the current main challenge is:
+
+The user experience is poor because you failed to consider that users might input complex Splunk queries spanning 50 to 100 lines. You need to rethink the tool's positioning: if a user writes a simple query, they don't need this validator at all; however, if they write a complex one, neither the TUI nor the CLI provides a functional experience.
+
+In the CLI, users must manually wrap complex queries in quotes—which is problematic as queries often contain single, double, backticks, and triple-double quotes simultaneously. Furthermore, parameters must be defined in advance, making adjustments extremely cumbersome once the command is constructed. A standard terminal window often cannot even fit the entire query.
+
+The TUI is equally problematic, if not worse. The input and output handling are very unfriendly, making it impossible for users to see the JSON structure or its contents.
+
+I believe it is essential to re-evaluate the user experience from a UI/UX perspective and address these issues; otherwise, the environment setup will be a complete failure.
+
+For example:
+- `https://github.com/splunk/security_content/blob/develop/detections/endpoint/cisco_nvm___suspicious_download_from_file_sharing_website.yml`
+- `https://github.com/splunk/security_content/blob/develop/detections/endpoint/linux_auditd_unix_shell_configuration_modification.yml`
+

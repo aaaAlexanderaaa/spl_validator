@@ -326,6 +326,15 @@ async function doValidate() {
 
 function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
 
+function groupByCode(items) {
+  const m = new Map();
+  for (const it of items) {
+    if (!m.has(it.code)) m.set(it.code, []);
+    m.get(it.code).push(it);
+  }
+  return m;
+}
+
 function renderResults(data) {
   let h = "";
 
@@ -335,39 +344,57 @@ function renderResults(data) {
     h += '<div class="validity invalid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> INVALID</div>';
   }
 
-  const ne = (data.errors || []).length;
-  const nw = (data.warnings || []).length;
+  const errors = data.errors || [];
+  const warnings = data.warnings || [];
+  const uniqueErrCodes = new Set(errors.map(e => e.code)).size;
+  const uniqueWarnCodes = new Set(warnings.map(w => w.code)).size;
   h += '<div class="stat-row">';
-  h += '<span class="stat">' + (ne ? '<span style="color:var(--red)">' + ne + ' error' + (ne > 1 ? 's' : '') + '</span>' : '<span style="color:var(--green)">0 errors</span>') + '</span>';
-  h += '<span class="stat">' + (nw ? '<span style="color:var(--yellow)">' + nw + ' warning' + (nw > 1 ? 's' : '') + '</span>' : '0 warnings') + '</span>';
+  h += '<span class="stat">' + (errors.length ? '<span style="color:var(--red)">' + errors.length + ' error' + (errors.length > 1 ? 's' : '') + '</span>' : '<span style="color:var(--green)">0 errors</span>') + '</span>';
+  h += '<span class="stat">' + (warnings.length ? '<span style="color:var(--yellow)">' + uniqueWarnCodes + ' finding' + (uniqueWarnCodes > 1 ? 's' : '') + '</span>' : '0 findings') + '</span>';
   h += '</div>';
 
-  if (ne) {
+  if (errors.length) {
     h += '<div class="group-title errors">Errors</div>';
-    for (const e of data.errors) {
-      h += '<div class="item error"><code>' + esc(e.code) + '</code> ' + esc(e.message);
-      if (e.line) h += '<span class="loc">L' + e.line + ':' + e.column + '</span>';
-      h += '</div>';
-      if (e.suggestion) h += '<span class="item error hint">' + esc(e.suggestion) + '</span>';
+    for (const [code, items] of groupByCode(errors)) {
+      if (items.length === 1) {
+        const e = items[0];
+        h += '<div class="item error"><code>' + esc(e.code) + '</code> ' + esc(e.message);
+        if (e.line) h += '<span class="loc">L' + e.line + ':' + e.column + '</span>';
+        h += '</div>';
+        if (e.suggestion) h += '<span class="item error hint">' + esc(e.suggestion) + '</span>';
+      } else {
+        h += '<div class="item error"><code>' + esc(code) + '</code> ' + esc(items[0].message) + ' <span class="loc">\u00d7' + items.length + ' occurrences</span></div>';
+        if (items[0].suggestion) h += '<span class="item error hint">' + esc(items[0].suggestion) + '</span>';
+        const locs = items.filter(e => e.line).map(e => 'L' + e.line).join(', ');
+        if (locs) h += '<span class="item error hint" style="opacity:.5">At: ' + esc(locs) + '</span>';
+      }
     }
   }
 
-  if (nw) {
-    h += '<div class="group-title warnings">Warnings</div>';
-    for (const w of data.warnings) {
-      h += '<div class="item warn"><code>' + esc(w.code) + '</code> ' + esc(w.message);
-      if (w.line) h += '<span class="loc">L' + w.line + ':' + w.column + '</span>';
-      h += '</div>';
-      if (w.suggestion) h += '<span class="item warn hint">' + esc(w.suggestion) + '</span>';
+  if (warnings.length) {
+    h += '<div class="group-title warnings">Findings</div>';
+    for (const [code, items] of groupByCode(warnings)) {
+      if (items.length === 1) {
+        const w = items[0];
+        h += '<div class="item warn"><code>' + esc(w.code) + '</code> ' + esc(w.message);
+        if (w.line) h += '<span class="loc">L' + w.line + ':' + w.column + '</span>';
+        h += '</div>';
+        if (w.suggestion) h += '<span class="item warn hint">' + esc(w.suggestion) + '</span>';
+      } else {
+        h += '<div class="item warn"><code>' + esc(code) + '</code> ' + esc(items[0].message) + ' <span class="loc">\u00d7' + items.length + ' occurrences</span></div>';
+        if (items[0].suggestion) h += '<span class="item warn hint">' + esc(items[0].suggestion) + '</span>';
+        const locs = items.filter(w => w.line).map(w => 'L' + w.line).join(', ');
+        if (locs) h += '<span class="item warn hint" style="opacity:.5">At: ' + esc(locs) + '</span>';
+      }
     }
   }
 
-  if (!ne && !nw && data.valid) {
+  if (!errors.length && !warnings.length && data.valid) {
     h += '<div style="color:var(--green);text-align:center;padding:.5rem 0;opacity:.7">No issues found.</div>';
   }
 
   const jsonStr = JSON.stringify(data, null, 2);
-  h += '<details class="json-block"><summary>JSON output</summary>';
+  h += '<details class="json-block"><summary>JSON output (' + (errors.length + warnings.length) + ' items)</summary>';
   h += '<div class="json-wrap"><button class="copy-btn" onclick="copyJSON()">Copy</button>';
   h += '<pre id="json-pre">' + esc(jsonStr) + '</pre></div></details>';
 

@@ -13,6 +13,7 @@ if __name__ == "__main__" and __package__ is None:
 
 import argparse
 import json
+import os
 import sys
 from typing import Optional
 
@@ -21,6 +22,33 @@ from .core import validate
 from .json_payload import build_validation_json_dict
 from .src.models.warning_groups import group_warnings, parse_warning_groups
 from .src.registry.pack import load_registry_pack_file
+
+
+def _open_editor_for_spl() -> Optional[str]:
+    """Open $EDITOR with a temp .spl file, return the contents (comments stripped)."""
+    import tempfile
+
+    editor = os.environ.get("EDITOR", os.environ.get("VISUAL", "nano"))
+    with tempfile.NamedTemporaryFile(
+        suffix=".spl", mode="w", delete=False, encoding="utf-8"
+    ) as f:
+        f.write("# Enter your SPL query below.\n")
+        f.write("# Lines starting with # are comments and will be ignored.\n")
+        f.write("# Save and close the editor to validate.\n\n")
+        tmp_path = f.name
+    try:
+        ret = os.system(f'{editor} "{tmp_path}"')
+        if ret != 0:
+            print(f"Editor exited with code {ret}", file=sys.stderr)
+            return None
+        with open(tmp_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        return "".join(line for line in lines if not line.lstrip().startswith("#"))
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
 
 
 def main():
@@ -86,6 +114,11 @@ Examples:
         "--stdin",
         action="store_true",
         help="Read SPL from standard input (same as --file=-)",
+    )
+    parser.add_argument(
+        "--edit",
+        action="store_true",
+        help="Open $EDITOR to compose the SPL query (avoids shell quoting for complex multiline queries)",
     )
     parser.add_argument(
         "--preset",
@@ -193,20 +226,27 @@ Examples:
 
     stdin_requested = bool(args.stdin) or (args.file == "-")
     file_path_requested = bool(args.file) and args.file != "-"
+    edit_requested = bool(args.edit)
     sources = (
         (1 if args.spl_positional is not None else 0)
         + (1 if args.spl else 0)
         + (1 if file_path_requested else 0)
         + (1 if stdin_requested else 0)
+        + (1 if edit_requested else 0)
     )
     if sources > 1:
-        parser.error("Use only one of: SPL positional argument, --spl, --file, or --stdin")
+        parser.error("Use only one of: SPL positional argument, --spl, --file, --edit, or --stdin")
 
     spl: Optional[str] = None
     if args.spl_positional is not None:
         spl = args.spl_positional
     elif args.spl:
         spl = args.spl
+    elif edit_requested:
+        spl = _open_editor_for_spl()
+        if not spl or not spl.strip():
+            print("No SPL provided. Aborting.", file=sys.stderr)
+            sys.exit(1)
     elif stdin_requested:
         spl = sys.stdin.read()
     elif args.file:
@@ -224,7 +264,8 @@ Examples:
     else:
         parser.print_help()
         print(
-            "\nProvide SPL via --spl, --file, a positional SPL argument, --stdin, or pipe/heredoc on stdin.",
+            "\nProvide SPL via --spl, --file, --edit, a positional argument, --stdin, or pipe on stdin.\n"
+            "TIP: For complex multiline queries, use --file=query.spl or --edit to open your editor.",
             file=sys.stderr,
         )
         sys.exit(1)

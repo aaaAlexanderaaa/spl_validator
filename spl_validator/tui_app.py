@@ -7,6 +7,7 @@ Launch:
 
 Inside the TUI:
     F5          Validate the current query
+    Ctrl+L      Clear the editor and results
     Ctrl+O      Open an SPL file
     Ctrl+S      Save validation results (JSON) to file
     q           Quit (when not typing in the editor)
@@ -167,6 +168,7 @@ def run_app(
 
         BINDINGS = [
             Binding("f5", "validate", "Validate", show=True),
+            Binding("ctrl+l", "clear_all", "Clear", show=True),
             Binding("ctrl+o", "open_file", "Open File", show=True),
             Binding("ctrl+s", "save_results", "Save JSON", show=True),
             Binding("q", "quit", "Quit", show=True),
@@ -200,6 +202,7 @@ def run_app(
                     allow_blank=False,
                 )
                 yield Button("Validate (F5)", variant="primary", id="btn_validate")
+                yield Button("Clear", id="btn_clear")
                 yield Button("Open File", id="btn_open")
             with Vertical(id="output-section"):
                 with TabbedContent():
@@ -228,8 +231,18 @@ def run_app(
         def on_button_pressed(self, event: Button.Pressed) -> None:
             if event.button.id == "btn_validate":
                 self.action_validate()
+            elif event.button.id == "btn_clear":
+                self.action_clear_all()
             elif event.button.id == "btn_open":
                 self.action_open_file()
+
+        def action_clear_all(self) -> None:
+            """Clear the editor, results, and JSON output."""
+            self.query_one("#spl", TextArea).text = ""
+            self.query_one("#summary-log", RichLog).clear()
+            self.query_one("#json-output", TextArea).text = ""
+            self._last_json = None
+            self.query_one("#spl", TextArea).focus()
 
         def action_validate(self) -> None:
             spl = self.query_one("#spl", TextArea).text.strip()

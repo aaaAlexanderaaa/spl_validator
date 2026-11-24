@@ -1,0 +1,133 @@
+# Dynamic roadmap slots and task queue.
+# Reference spec, ADR, and SRC-* IDs; never re-copy module or quote prose here.
+
+[[milestones]]
+id = "M-01"
+domain = "governance"
+name = "Discipline Onboarding & Strategic Direction Baseline"
+slot = "done" # done | now | next | later
+depends_on = []
+
+[[milestones]]
+id = "M-02"
+domain = "core"
+name = "TypeScript Core Parity, Native Registry & Asset Consolidation"
+slot = "now"
+depends_on = ["M-01"]
+
+[[milestones]]
+id = "M-03"
+domain = "context-and-cli"
+name = "ProjectContext, Macro Expansion & External Repo Hook CLI"
+slot = "next"
+depends_on = ["M-02"]
+
+[[milestones]]
+id = "M-04"
+domain = "analysis"
+name = "Field Lineage Analyzer & AutoFix Rewriter"
+slot = "next"
+depends_on = ["M-02", "M-03"]
+
+[[milestones]]
+id = "M-05"
+domain = "surfaces"
+name = "Static HTML Web UI, MV3 Extension Refresh & Legacy Retirement"
+slot = "later"
+depends_on = ["M-03", "M-04"]
+
+[[tasks]]
+id = "T-01"
+milestone = "M-01"
+title = "Adopt engineering discipline policy, ARCHITECTURE.md, sources ledger, and ADR-001"
+state = "ready_for_check" # todo | active | blocked | ready_for_check | done
+human_check = "pending" # pending | approved | not_required
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-02"
+milestone = "M-02"
+title = "Absorb official_conf snapshots and syntax extraction scripts from spl-expert for Splunk 10.0 reconciliation"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-03"
+milestone = "M-02"
+title = "Reach full TypeScript parity with the 307-test Python suite and 98.85% security_content strict baseline, then move canonical registry ownership into TypeScript"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-04"
+milestone = "M-02"
+title = "Split oversized TypeScript parser files (parseSimple.ts, expressionParser.ts) and add module specs under docs/specs/"
+state = "todo"
+human_check = "not_required"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-05"
+milestone = "M-03"
+title = "Implement serializable ProjectContext and real backtick macro expansion (macros.conf) with original source-span mapping"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-06"
+milestone = "M-03"
+title = "Add save-hook and Git PR batch validation modes to @spl-validator/runtime for external rule repositories"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-07"
+milestone = "M-04"
+title = "Implement pipeline field lineage analysis (field origin tracing and missing/dropped field diagnostics) and deterministic AutoFix rewriter"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-08"
+milestone = "M-05"
+title = "Design and ship static HTML Web UI and refreshed standalone MV3 extension on @spl-validator/core, then retire legacy browser_extension and frozen Python core"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001"]
+blocker_question = ""
+blocker_options = []

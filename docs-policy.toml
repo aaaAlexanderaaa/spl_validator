@@ -1,0 +1,52 @@
+version = 2
+discipline_version = "2026.11.2"
+
+[project]
+identity = "product"
+language = "en"
+default_stage = "usable"
+
+[collaboration]
+mode = "interactive"
+model_tier = "frontier"
+auto_independent_review = false
+grill_cadence_commits = 12
+grill_cadence_modules = 4
+review_anchor_sha = "816a5a5"
+
+[adoption]
+# Existing codebase starts in "observed" mode (report structural gaps without blocking CI).
+stage = "observed"
+managed_paths = []
+
+[layout]
+source_roots = ["typescript", "spl_validator"]
+placeholder_names = ["README.md", ".gitkeep"]
+harness_paths = [
+  "tests",
+  "tools",
+  "docs",
+  "browser_extension",
+  "typescript/core/test",
+  "typescript/scripts",
+]
+
+[budgets]
+max_source_lines = 500
+max_style_lines = 300
+forbid_catchall_dirs = ["utils", "helpers", "common", "misc"]
+
+[commands]
+test = "cd typescript && npm run build && npm test"
+
+[severity]
+broken_links_and_ids = "error"
+source_ownership = "error"
+import_boundaries = "error"
+file_size_budget = "error"
+missing_role_header = "error"
+unknown_task_specs = "error"
+catchall_directories = "error"
+orphan_active_sources = "advisory"
+git_doc_lag = "advisory"
+startup_disclaimers = "error"

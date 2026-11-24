@@ -1,0 +1,11 @@
+# Append-only chronological ledger (earliest first) of owner quotes that substantively shape project direction.
+# Keep exact unedited original wording inside '''...''' without translating, paraphrasing, or recording routine chat.
+
+[[sources]]
+id = "SRC-001"
+date = "2026-11-24"
+status = "active" # active | deferred | retired
+context = "Owner decision on four strategic directions: pure TypeScript single core (CLI, standalone browser extension, usable HTML UI), save-hook integration for external Git-managed Splunk rule repositories with real macro expansion, deeper parsing/semantic reconciliation/field-lineage/AutoFix, lightweight context wrapper, and consolidating spl_validator as the sole main repository"
+quote = '''
+那么四个方向性决策呢？我选择选项 C。 全面转向 TypeScript 然后支持 CLI 和浏览器扩展，是不是TUI不重要，有个可用的HTML UI也行，主要是给用一个可视化和易用性。主要考虑是我想要把它 集成在别人的项目里。比如说我举一个例子，我有一个公司的私有的项目使用 Python 作为 splunk 规则的管理，然后他们通过 git 版本来作为规则的版本维护。然后整个项目就是编辑规则，然后 Commit 然后提 PR 合并，这样的一套管理方式。那我只是想要 hook 其中的一个部分，就是 hook 每一次你想要保存一条 splunk query 的时候。我给你去做一次执行。并且要支持宏，因为里面会涉及到一些宏，那么直接把这些宏替换成真正的 query ，然后再去做一些校验，而不是像现在一样把宏作为一种白名单去处理。二、内核能力升级。我的确要求解析与语义深化去做好。然后也要有这个相对权威的对账，但关键取决于我们能拿到什么，而非我们想要什么？以及的确需要 AutoFix 和优化改写器。特别是识别出字段错误和或者字段依赖，能够理解得出来，输出的每个字段，它在本质上是来源于哪些值。第三个点。其实我没太理解这个想干什么，因为 按我的理解，它只是封装一个 context 。第四个点，把 splunk validator 作为唯一的主仓，同意你的看法
+'''

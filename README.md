@@ -7,7 +7,21 @@ A lightweight, **offline** static analysis tool for **Splunk Enterprise 10.0** S
 
 **Privacy:** Fully local. No telemetry, no network calls, no data collection. See [`docs/security_audit.md`](docs/security_audit.md).
 
-## Installation
+## Architecture & Active Direction
+
+Under [`ADR-001`](docs/decisions/ADR-001-typescript-single-core-and-consolidation.md), `spl_validator` is consolidating onto a **single pure-TypeScript core** (`typescript/`, zero Node/DOM dependencies) that powers:
+- A Node.js CLI (`@spl-validator/runtime`) designed for single-query checks, save-time hooks in external Git-managed Splunk rule repositories, and batch PR validation;
+- A standalone MV3 Chromium extension (`typescript/extension/`) requiring no local server;
+- A lightweight static HTML Web UI for visual inspection and everyday use.
+
+Core upgrades underway add real `macros.conf` expansion (replacing opaque macro skipping), Splunk 10.0 `searchbnf.conf` / `limits.conf` registry reconciliation, pipeline field-lineage tracking, and AutoFix/optimization rewrites. During migration, the Python package (`spl_validator/`) remains in-repo as the **frozen regression baseline** (307 tests; 98.85% strict-mode pass rate on `splunk/security_content`).
+
+- System architecture & pipeline: [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- Settled strategic decisions: [`docs/decisions/ADR-001-typescript-single-core-and-consolidation.md`](docs/decisions/ADR-001-typescript-single-core-and-consolidation.md)
+- Active roadmap & tasks: [`docs/work.toml`](docs/work.toml) and [`PLAN.md`](PLAN.md)
+- TypeScript workspace guide: [`docs/typescript_development.md`](docs/typescript_development.md)
+
+## Installation (Current Python Baseline)
 
 ```bash
 pip install -e .          # core (CLI + HTTP API)
@@ -43,7 +57,7 @@ Optional defaults file: `.spl-validator.yaml` or `SPL_VALIDATOR_CONFIG` (see `sp
 - Limit warnings: common SPL defaults (modeled after `limits.conf`)
 - Best-practice suggestions: consecutive evals, wildcard usage, join alternatives
 - Warning consolidation: repeated findings are grouped into actionable summaries
-- Macros: backtick macros treated as opaque tokens (not expanded)
+- Macros: currently treated as opaque backtick tokens in the baseline; real expansion via `macros.conf` with source-span mapping is tracked under [`ADR-001`](docs/decisions/ADR-001-typescript-single-core-and-consolidation.md)
 - `map`: inner `search="..."` strings blanked before lexing (SPL054)
 - Debugging: AST dump + data-flow field tracking
 
@@ -146,14 +160,16 @@ pytest tests/
 cd browser_extension && npm test && xvfb-run -a npm run test:e2e
 ```
 
-### TypeScript port (experimental)
+### TypeScript workspace (target single core)
 
-An experimental TypeScript implementation of the core validator is available in `typescript/`. See [`docs/typescript_development.md`](docs/typescript_development.md) for setup and usage.
+The TypeScript workspace under `typescript/` (`@spl-validator/core`, `@spl-validator/runtime`, and standalone `@spl-validator/extension`) is the active target core under [`ADR-001`](docs/decisions/ADR-001-typescript-single-core-and-consolidation.md). See [`ARCHITECTURE.md`](ARCHITECTURE.md) and [`docs/typescript_development.md`](docs/typescript_development.md) for setup and usage.
 
 ## Reference
 
-- Supported commands: `spl_validator/src/registry/commands.py`
-- Supported functions: `spl_validator/src/registry/functions.py`
+- Architecture & target pipeline: [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- Strategic decisions: [`docs/decisions/ADR-001-typescript-single-core-and-consolidation.md`](docs/decisions/ADR-001-typescript-single-core-and-consolidation.md)
+- Legacy Python command registry (frozen reference): `spl_validator/src/registry/commands.py`
+- Legacy Python function registry (frozen reference): `spl_validator/src/registry/functions.py`
 - Security audit: [`docs/security_audit.md`](docs/security_audit.md)
 - Scalability: [`docs/scalability.md`](docs/scalability.md)
 

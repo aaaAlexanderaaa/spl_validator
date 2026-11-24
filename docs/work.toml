@@ -11,40 +11,47 @@ depends_on = []
 [[milestones]]
 id = "M-02"
 domain = "core"
-name = "TypeScript Core Parity, Native Registry & Asset Consolidation"
+name = "TypeScript Core Parity, Native Registry & Asset Consolidation (Phase 1)"
 slot = "now"
 depends_on = ["M-01"]
 
 [[milestones]]
 id = "M-03"
 domain = "context-and-cli"
-name = "ProjectContext, Macro Expansion & External Repo Hook CLI"
+name = "ProjectContext, Macro Expansion & Node >= 22 Dual-Mode Hook CLI (Phase 2)"
 slot = "next"
 depends_on = ["M-02"]
 
 [[milestones]]
 id = "M-04"
 domain = "analysis"
-name = "Field Lineage Analyzer & AutoFix Rewriter"
+name = "Field Lineage Analyzer, AutoFix Rewriter & Phase 3 Parity Acceptance"
 slot = "next"
 depends_on = ["M-02", "M-03"]
 
 [[milestones]]
 id = "M-05"
 domain = "surfaces"
-name = "Static HTML Web UI, MV3 Extension Refresh & Legacy Retirement"
+name = "Single-Query Deep Workbench (HTML Web UI + MV3 Extension) & Post-Phase-3 Legacy Retirement"
+slot = "later"
+depends_on = ["M-03", "M-04"]
+
+[[milestones]]
+id = "M-06"
+domain = "distribution"
+name = "Standalone Native Binary Packaging (Node SEA)"
 slot = "later"
 depends_on = ["M-03", "M-04"]
 
 [[tasks]]
 id = "T-01"
 milestone = "M-01"
-title = "Adopt engineering discipline policy, ARCHITECTURE.md, sources ledger, and ADR-001"
+title = "Adopt engineering discipline policy, ARCHITECTURE.md, sources ledger, and ADR-001 (including A4/A5 runtime, retirement, and workbench contracts)"
 state = "ready_for_check" # todo | active | blocked | ready_for_check | done
 human_check = "pending" # pending | approved | not_required
 specs = []
 decisions = ["ADR-001"]
-sources = ["SRC-001"]
+sources = ["SRC-001", "SRC-002"]
 blocker_question = ""
 blocker_options = []
 
@@ -63,12 +70,12 @@ blocker_options = []
 [[tasks]]
 id = "T-03"
 milestone = "M-02"
-title = "Reach full TypeScript parity with the 307-test Python suite and 98.85% security_content strict baseline, then move canonical registry ownership into TypeScript"
+title = "Reach full TypeScript parity with the 307-test Python suite and 98.85% security_content strict baseline, then move canonical registry ownership into TypeScript (keep Python read-only through Phase 0-2)"
 state = "todo"
 human_check = "pending"
 specs = []
 decisions = ["ADR-001"]
-sources = ["SRC-001"]
+sources = ["SRC-001", "SRC-002"]
 blocker_question = ""
 blocker_options = []
 
@@ -92,42 +99,66 @@ state = "todo"
 human_check = "pending"
 specs = []
 decisions = ["ADR-001"]
-sources = ["SRC-001"]
+sources = ["SRC-001", "SRC-002"]
 blocker_question = ""
 blocker_options = []
 
 [[tasks]]
 id = "T-06"
 milestone = "M-03"
-title = "Add save-hook and Git PR batch validation modes to @spl-validator/runtime for external rule repositories"
+title = "Build Node >= 22 LTS single-file dual-mode spl-validator.cjs (one-shot CLI + lazy stdio NDJSON worker + thin Python stdlib wrapper), save-time hook, macros.conf change reverse-impact revalidation, and batch repo inspection (JSON/Markdown/SARIF)"
 state = "todo"
 human_check = "pending"
 specs = []
 decisions = ["ADR-001"]
-sources = ["SRC-001"]
+sources = ["SRC-001", "SRC-002"]
 blocker_question = ""
 blocker_options = []
 
 [[tasks]]
 id = "T-07"
 milestone = "M-04"
-title = "Implement pipeline field lineage analysis (field origin tracing and missing/dropped field diagnostics) and deterministic AutoFix rewriter"
+title = "Implement pipeline field lineage analysis (field origin tracing and missing/dropped field diagnostics), deterministic AutoFix rewriter, and run Phase 3 parity acceptance (307-test suite, security_content corpus, plus macro and field-lineage tests)"
 state = "todo"
 human_check = "pending"
 specs = []
 decisions = ["ADR-001"]
-sources = ["SRC-001"]
+sources = ["SRC-001", "SRC-002"]
 blocker_question = ""
 blocker_options = []
 
 [[tasks]]
 id = "T-08"
 milestone = "M-05"
-title = "Design and ship static HTML Web UI and refreshed standalone MV3 extension on @spl-validator/core, then retire legacy browser_extension and frozen Python core"
+title = "Design and ship Single-Query Deep Workbench HTML Web UI (diagnostics, AutoFix diff preview, side-by-side macro expansion highlight, interactive field lineage graph, local macros.conf/CSV header upload) shared directly with the standalone MV3 extension"
 state = "todo"
 human_check = "pending"
 specs = []
 decisions = ["ADR-001"]
-sources = ["SRC-001"]
+sources = ["SRC-001", "SRC-002"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-09"
+milestone = "M-05"
+title = "Archive and remove frozen Python core (spl_validator/) and legacy browser_extension/ from the main source tree after Phase 3 parity acceptance passes"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-001", "SRC-002"]
+blocker_question = ""
+blocker_options = []
+
+[[tasks]]
+id = "T-10"
+milestone = "M-06"
+title = "Package @spl-validator/runtime as a standalone native binary (e.g., Node SEA) for zero-Node external deployment after core milestones stabilize"
+state = "todo"
+human_check = "pending"
+specs = []
+decisions = ["ADR-001"]
+sources = ["SRC-002"]
 blocker_question = ""
 blocker_options = []

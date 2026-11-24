@@ -14,6 +14,8 @@ The `typescript/` workspace contains three packages:
 
 ## Quickstart
 
+Requires **Node.js >= 22 LTS** (target runtime under [`ADR-001`](decisions/ADR-001-typescript-single-core-and-consolidation.md) / `SRC-002`). During development, `@spl-validator/runtime` targets a single-file dual-mode `spl-validator.cjs` bundle (one-shot CLI + lazy stdio NDJSON worker + thin Python stdlib wrapper), with standalone native binary packaging (e.g., Node SEA) scheduled as a later distribution milestone (`M-06`).
+
 ```bash
 cd typescript
 npm install
@@ -34,7 +36,7 @@ echo 'index=web | stats count' | node runtime/dist/cli.js --format=json
 
 ## Relationship to Python (Transitional)
 
-Under [`ADR-001`](decisions/ADR-001-typescript-single-core-and-consolidation.md), TypeScript is taking over as the single core and canonical registry (`M-02` in [`docs/work.toml`](work.toml)). Until native TypeScript registry reconciliation completes, the frozen Python package still supplies the temporary exported snapshot and cross-language golden fixtures:
+Under [`ADR-001`](decisions/ADR-001-typescript-single-core-and-consolidation.md), TypeScript is taking over as the single core and canonical registry (`M-02` in [`docs/work.toml`](work.toml)). Through Phase 0–2, the frozen Python package (`spl_validator/`) remains in-repo as a read-only regression reference and is archived/removed only after Phase 3 parity acceptance passes. Until native TypeScript registry reconciliation completes, the frozen Python package still supplies the temporary exported snapshot and cross-language golden fixtures:
 - Transitional command registry export source (`spl_validator/src/registry/commands.py`)
 - Transitional function registry export source (`spl_validator/src/registry/functions.py`)
 - Cross-language golden test fixtures (`tests/golden/*.json`)
@@ -49,7 +51,7 @@ This overwrites the generated artifact `typescript/core/src/generated/registryDa
 
 ## Extension (MV3)
 
-The TypeScript extension (`typescript/extension/`) is a fully self-contained Chromium extension that validates SPL entirely in the browser — **no local HTTP server required**. It bundles `@spl-validator/core` via esbuild.
+The TypeScript extension (`typescript/extension/`) is a fully self-contained Chromium extension that validates SPL entirely in the browser — **no local HTTP server required**. It bundles `@spl-validator/core` via esbuild, and under [`ADR-001`](decisions/ADR-001-typescript-single-core-and-consolidation.md) (`M-05`) shares the Single-Query Deep Workbench UI directly with the static HTML Web UI (while batch repo scanning stays on the CLI).
 
 To load it:
 1. Build: `npm run build -w @spl-validator/extension`

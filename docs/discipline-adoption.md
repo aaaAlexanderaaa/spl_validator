@@ -37,12 +37,12 @@ Measured via `read_rules.py onboard --target <repo>`:
 | Single-owner policy & metadata | Adopted now | [`docs-policy.toml`](../docs-policy.toml) (`identity = "product"`, `language = "en"`, `default_stage = "usable"`, `[adoption]` stage `observed`) |
 | Working agreement & three-perspective judgment | Adopted now | [`AGENTS.md`](../AGENTS.md) replaces the legacy Cursor Cloud setup prompt |
 | Five-part system architecture + Mermaid runtime flow | Adopted now | [`ARCHITECTURE.md`](../ARCHITECTURE.md) covers baseline vs. `ADR-001` target pipeline, boundaries, state owners, and migration invariants |
-| Verbatim owner quote lineage (`SRC-*`) | Adopted now | [`docs/sources.toml`](sources.toml) records `SRC-001` verbatim in original Chinese without paraphrasing |
+| Verbatim owner quote lineage (`SRC-*`) | Adopted now | [`docs/sources.toml`](sources.toml) records `SRC-001` and `SRC-002` verbatim in original Chinese without paraphrasing |
 | Cross-module architectural decisions (`ADR-*`) | Adopted now | [`docs/decisions/ADR-001-typescript-single-core-and-consolidation.md`](decisions/ADR-001-typescript-single-core-and-consolidation.md) |
-| Roadmap slots & task queue | Adopted now | [`docs/work.toml`](work.toml) (`M-01` through `M-05`, `T-01` through `T-08`) |
+| Roadmap slots & task queue | Adopted now | [`docs/work.toml`](work.toml) (`M-01` through `M-06`, `T-01` through `T-10`) |
 | Plain, direct English prose | Adopted now | Main docs, ADRs, CLI, and UI use plain English; `docs/sources.toml` keeps original owner wording |
 | Module specs (`docs/specs/`), `# Role:` headers & bundled `check_docs.py` | Deferred to `M-02` | Existing codebase starts in `observed` stage; module specs and `# Role:` headers will be added once TypeScript parser files are split and native TS modules stabilize |
-| Frontend & visual discipline (WCAG 2.2 AA, keyboard/focus, pre-code design approval) | Applies at `M-05` | Triggered when designing and building the static HTML Web UI and refreshing `typescript/extension/` |
+| Frontend & visual discipline (WCAG 2.2 AA, keyboard/focus, pre-code design approval) | Applies at `M-05` | Triggered when designing and building the shared Single-Query Deep Workbench static HTML Web UI and refreshing `typescript/extension/` |
 | Unattended autonomous charter | Not applicable now | `[collaboration]` runs in `interactive` mode with the human owner in the loop |
 | Public-repo privacy & hygiene | Enforced now | Repository is public open source; no private domains, internal IPs, company names, personal-memory paths, or credentials may enter commits |
 
@@ -50,4 +50,4 @@ Measured via `read_rules.py onboard --target <repo>`:
 
 1. **`observed` (current)**: Governance metadata, `ARCHITECTURE.md`, `docs/sources.toml`, `ADR-001`, and `docs/work.toml` establish clear direction and boundaries without blocking existing CI or forcing premature refactors on frozen Python files.
 2. **`scoped_enforcement` (planned at `M-02` / `M-03`)**: Add `docs/specs/` module contracts for `typescript/` packages, add `# Role:` headers to claimed TypeScript files, split `parseSimple.ts` and `expressionParser.ts`, and enforce budgets and import boundaries on `typescript/`.
-3. **`adopted` (planned at `M-05`)**: Retire legacy `browser_extension/` and frozen Python `spl_validator/` after full regression parity is verified, then enforce checks across the entire remaining TypeScript repository.
+3. **`adopted` (planned at `M-05`)**: Archive and remove legacy `browser_extension/` and frozen Python `spl_validator/` after Phase 3 parity acceptance passes, then enforce checks across the entire remaining TypeScript repository.

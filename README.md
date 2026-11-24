@@ -10,11 +10,11 @@ A lightweight, **offline** static analysis tool for **Splunk Enterprise 10.0** S
 ## Architecture & Active Direction
 
 Under [`ADR-001`](docs/decisions/ADR-001-typescript-single-core-and-consolidation.md), `spl_validator` is consolidating onto a **single pure-TypeScript core** (`typescript/`, zero Node/DOM dependencies) that powers:
-- A Node.js CLI (`@spl-validator/runtime`) designed for single-query checks, save-time hooks in external Git-managed Splunk rule repositories, and batch PR validation;
-- A standalone MV3 Chromium extension (`typescript/extension/`) requiring no local server;
-- A lightweight static HTML Web UI for visual inspection and everyday use.
+- A **Node.js >= 22 LTS** CLI (`@spl-validator/runtime`) packaged during development as a single-file dual-mode `spl-validator.cjs` bundle (one-shot CLI for Git pre-commit/CI, save hooks, `macros.conf` reverse-impact revalidation, and `batch` repo scans outputting JSON/Markdown/SARIF; lazy stdio NDJSON worker + thin Python stdlib wrapper for long-lived Python services), with standalone native binary packaging (e.g., Node SEA) planned as a later distribution milestone (`M-06`);
+- A zero-server **Single-Query Deep Workbench** static HTML Web UI (diagnostics + AutoFix diff preview, side-by-side macro expansion highlight, interactive field lineage graph, local `macros.conf`/CSV header upload);
+- A standalone MV3 Chromium extension (`typescript/extension/`) requiring no local server and reusing the same workbench UI directly.
 
-Core upgrades underway add real `macros.conf` expansion (replacing opaque macro skipping), Splunk 10.0 `searchbnf.conf` / `limits.conf` registry reconciliation, pipeline field-lineage tracking, and AutoFix/optimization rewrites. During migration, the Python package (`spl_validator/`) remains in-repo as the **frozen regression baseline** (307 tests; 98.85% strict-mode pass rate on `splunk/security_content`).
+Core upgrades underway add real `macros.conf` expansion (replacing opaque macro skipping), Splunk 10.0 `searchbnf.conf` / `limits.conf` registry reconciliation, pipeline field-lineage tracking, and AutoFix/optimization rewrites. Through Phase 0–2, the Python package (`spl_validator/`) remains in-repo as the **frozen, read-only regression reference** (307 tests; 98.85% strict-mode pass rate on `splunk/security_content`) and will be archived/removed after Phase 3 parity acceptance passes.
 
 - System architecture & pipeline: [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - Settled strategic decisions: [`docs/decisions/ADR-001-typescript-single-core-and-consolidation.md`](docs/decisions/ADR-001-typescript-single-core-and-consolidation.md)
